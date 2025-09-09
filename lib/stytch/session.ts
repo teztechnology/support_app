@@ -138,26 +138,37 @@ export class SessionManager {
   static async setSessionCookies(sessionToken: string, organizationId: string) {
     const cookieStore = cookies()
     
-    cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
+    // Set the JWT token that our auth flow actually uses
+    cookieStore.set('stytch_session_jwt', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN || undefined
+      })
     })
 
+    // Keep the organization cookie as well
     cookieStore.set(ORGANIZATION_COOKIE_NAME, organizationId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 1 week
       path: '/',
+      ...(process.env.NODE_ENV === 'production' && {
+        domain: process.env.COOKIE_DOMAIN || undefined
+      })
     })
   }
 
   static async clearSessionCookies() {
     const cookieStore = cookies()
     
+    // Clear the JWT token that our auth flow uses
+    cookieStore.delete('stytch_session_jwt')
+    cookieStore.delete('tzv_b2b_token')
     cookieStore.delete(SESSION_COOKIE_NAME)
     cookieStore.delete(ORGANIZATION_COOKIE_NAME)
   }
