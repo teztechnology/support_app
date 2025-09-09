@@ -73,8 +73,10 @@ async function checkAuth() {
     console.error('Auth check failed with error:', error)
     // Check if it's an expired token error
     if (error && typeof error === 'object' && 'error_type' in error) {
-      console.error('Stytch error type:', error.error_type)
-      console.error('Stytch error message:', error.error_message)
+      console.error('Stytch error type:', (error as any).error_type)
+      if ('error_message' in error) {
+        console.error('Stytch error message:', (error as any).error_message)
+      }
     }
     return null
   }

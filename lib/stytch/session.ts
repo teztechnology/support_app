@@ -79,7 +79,7 @@ export class SessionManager {
 
       // Skip member details fetch for now to avoid the body consumption error
       // This is a temporary fix - we can add member details later if needed
-      let memberDetails = null
+      let memberDetails: any = null
       // try {
       //   const memberResponse = await client.organizations.members.get({
       //     organization_id: organizationId,
