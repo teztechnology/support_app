@@ -13,6 +13,10 @@ Set these environment variables in your Vercel project settings:
 STYTCH_BUSINESS_PROJECT_ID=project-live-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 STYTCH_BUSINESS_SECRET=secret-live-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NEXT_PUBLIC_STYTCH_BUSINESS_ORG_ID=organization-live-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+NEXT_PUBLIC_STYTCH_BUSINESS_PUBLIC_TOKEN=public-token-live-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+# Stytch Cookie Domain (CRITICAL for Vercel)
+NEXT_PUBLIC_STYTCH_COOKIE_DOMAIN=support-app-five.vercel.app
 
 # Azure Cosmos DB
 AZURE_COSMOS_ENDPOINT=https://your-account.documents.azure.com:443/
@@ -30,9 +34,17 @@ SESSION_SECRET=your-very-secure-session-secret-key-here
 
 ### Key Cookie Domain Settings
 
-1. **For Vercel apps**: Set `COOKIE_DOMAIN=.vercel.app` (note the leading dot)
-2. **For custom domains**: Set `COOKIE_DOMAIN=.yourdomain.com`
-3. **For localhost**: Leave `COOKIE_DOMAIN` empty or set to `localhost`
+**Two different cookie domain variables are needed:**
+
+1. **`NEXT_PUBLIC_STYTCH_COOKIE_DOMAIN`** (Stytch client-side cookies):
+   - For your Vercel app: `support-app-five.vercel.app` (exact domain, no leading dot)
+   - For custom domains: `yourdomain.com`
+   - For localhost: `localhost`
+
+2. **`COOKIE_DOMAIN`** (Application server-side cookies):
+   - For Vercel apps: `.vercel.app` (with leading dot for subdomain support)
+   - For custom domains: `.yourdomain.com` (with leading dot)
+   - For localhost: leave empty or set to `localhost`
 
 ### Stytch Configuration Updates
 
