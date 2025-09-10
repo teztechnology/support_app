@@ -147,10 +147,10 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
                         Edit
                       </button>
                       <Link
-                        href={`/issues/new?customerId=${customer.id}`}
+                        href="/issues"
                         className="text-green-600 hover:text-green-900"
                       >
-                        New Issue
+                        Create Issue
                       </Link>
                       {customer.totalIssues === 0 && (
                         <button

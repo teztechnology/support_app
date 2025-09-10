@@ -197,16 +197,16 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-3">
               <a
-                href="/issues/new"
+                href="/issues"
                 className="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
               >
-                Create New Issue
+                Manage Issues
               </a>
               <a
-                href="/customers/new"
+                href="/customers"
                 className="block w-full bg-green-600 text-white text-center py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
               >
-                Add New Customer
+                Manage Customers
               </a>
               <a
                 href="/issues"
