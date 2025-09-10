@@ -120,7 +120,7 @@ export default async function IssueDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
             <div>
               <span className="font-medium">Customer:</span>{' '}
-              {customer ? `${customer.name} (${customer.email})` : 'Unknown Customer'}
+              {customer ? customer.companyName : 'Unknown Customer'}
             </div>
             <div>
               <span className="font-medium">Assigned to:</span>{' '}

@@ -24,13 +24,9 @@ export interface Issue {
 
 export interface Customer {
   id: string
-  name: string
-  email: string
-  phone?: string
-  company?: string
+  companyName: string
   organizationId: string
   totalIssues: number
-  metadata: Record<string, any>
   createdAt: string
   updatedAt: string
   _ts?: number

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { getStytchB2BServerClient } from '@/lib/stytch/server-client'
+import { Navigation } from '@/components/navigation'
 
 async function checkAuth() {
   try {
@@ -126,40 +127,7 @@ export default async function DashboardLayout({
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="flex space-x-8">
           <aside className="w-64 bg-white rounded-lg shadow p-6">
-            <nav className="space-y-2">
-              <a
-                href="/dashboard"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-900 rounded-md bg-gray-100"
-              >
-                Dashboard
-              </a>
-              <a
-                href="/issues"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-100"
-              >
-                Issues
-              </a>
-              <a
-                href="/customers"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-100"
-              >
-                Customers
-              </a>
-              <a
-                href="/reports"
-                className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-100"
-              >
-                Reports
-              </a>
-              {session.userRole === 'admin' && (
-                <a
-                  href="/settings"
-                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:text-gray-900 hover:bg-gray-100"
-                >
-                  Settings
-                </a>
-              )}
-            </nav>
+            <Navigation userRole={session.userRole} />
           </aside>
           
           <main className="flex-1">

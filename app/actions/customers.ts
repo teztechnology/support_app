@@ -6,40 +6,21 @@ import { SessionManager } from '@/lib/stytch/session'
 import { dbQueries } from '@/lib/cosmos/queries'
 import { Customer, ServerActionResponse } from '@/types'
 
-export async function createCustomer(formData: FormData): Promise<void> {
+export async function createCustomer(companyName: string): Promise<Customer> {
   try {
     const session = await SessionManager.requirePermission('customers:write')
     
-    const name = formData.get('name') as string
-    const email = formData.get('email') as string
-    const phone = formData.get('phone') as string
-    const company = formData.get('company') as string
-
-    if (!name?.trim()) {
-      throw new Error('Name is required')
-    }
-
-    if (!email?.trim()) {
-      throw new Error('Email is required')
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email.trim())) {
-      throw new Error('Please enter a valid email address')
+    if (!companyName?.trim()) {
+      throw new Error('Company name is required')
     }
 
     const newCustomer = await dbQueries.createCustomer({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: phone?.trim() || undefined,
-      company: company?.trim() || undefined,
+      companyName: companyName.trim(),
       organizationId: session.organizationId,
-      metadata: {},
     })
 
     revalidatePath('/customers')
-    redirect(`/customers/${newCustomer.id}`)
+    return newCustomer
   } catch (error) {
     console.error('Failed to create customer:', error)
     throw error
@@ -48,28 +29,13 @@ export async function createCustomer(formData: FormData): Promise<void> {
 
 export async function updateCustomer(
   customerId: string,
-  formData: FormData
-): Promise<void> {
+  companyName: string
+): Promise<Customer> {
   try {
     const session = await SessionManager.requirePermission('customers:write')
     
-    const name = formData.get('name') as string
-    const email = formData.get('email') as string
-    const phone = formData.get('phone') as string
-    const company = formData.get('company') as string
-
-    if (!name?.trim()) {
-      throw new Error('Name is required')
-    }
-
-    if (!email?.trim()) {
-      throw new Error('Email is required')
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email.trim())) {
-      throw new Error('Please enter a valid email address')
+    if (!companyName?.trim()) {
+      throw new Error('Company name is required')
     }
 
     const existingCustomer = await dbQueries.getCustomerById(customerId, session.organizationId)
@@ -77,22 +43,19 @@ export async function updateCustomer(
       throw new Error('Customer not found')
     }
 
-    await dbQueries.updateItem<Customer>(
+    const updatedCustomer = await dbQueries.updateItem<Customer>(
       'customers',
       customerId,
       {
         ...existingCustomer,
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        phone: phone?.trim() || undefined,
-        company: company?.trim() || undefined,
+        companyName: companyName.trim(),
         updatedAt: new Date().toISOString(),
       },
       session.organizationId
     )
 
     revalidatePath('/customers')
-    revalidatePath(`/customers/${customerId}`)
+    return updatedCustomer
   } catch (error) {
     console.error('Failed to update customer:', error)
     throw error
