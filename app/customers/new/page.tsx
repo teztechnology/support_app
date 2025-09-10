@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { SessionManager } from '@/lib/stytch/session'
 import { createCustomer } from '@/app/actions/customers'
 
@@ -72,13 +73,12 @@ export default async function NewCustomerPage() {
           </div>
 
           <div className="flex justify-between pt-4">
-            <button
-              type="button"
-              onClick={() => window.history.back()}
+            <Link
+              href="/customers"
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
               Cancel
-            </button>
+            </Link>
             <button
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"

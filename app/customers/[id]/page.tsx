@@ -4,6 +4,7 @@ import { SessionManager } from '@/lib/stytch/session'
 import { dbQueries } from '@/lib/cosmos/queries'
 import { updateCustomer, deleteCustomer } from '@/app/actions/customers'
 import { Customer, Issue } from '@/types'
+import { DeleteButton } from './delete-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -152,30 +153,10 @@ export default async function CustomerDetailPage({ params }: PageProps) {
 
           <div className="flex justify-between pt-4">
             <div>
-              {canDelete ? (
-                <form action={deleteCustomerAction} style={{ display: 'inline' }}>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-red-700 bg-red-100 rounded-md hover:bg-red-200 transition-colors"
-                    onClick={(e) => {
-                      if (!confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
-                        e.preventDefault()
-                      }
-                    }}
-                  >
-                    Delete Customer
-                  </button>
-                </form>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className="px-4 py-2 text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-                  title="Cannot delete customer with existing issues"
-                >
-                  Delete Customer
-                </button>
-              )}
+              <DeleteButton 
+                deleteAction={deleteCustomerAction}
+                disabled={!canDelete}
+              />
             </div>
             <button
               type="submit"
