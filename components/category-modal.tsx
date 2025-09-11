@@ -209,7 +209,7 @@ export function CategoryModal({
             <span className="text-sm text-gray-700">Active</span>
           </label>
           <p className="mt-1 text-xs text-gray-500">
-            Inactive categories won't appear in issue creation forms
+            Inactive categories won&apos;t appear in issue creation forms
           </p>
         </div>
 

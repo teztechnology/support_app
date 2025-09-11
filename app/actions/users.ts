@@ -133,33 +133,6 @@ export async function addUserToDatabase(
       permissions: getDefaultPermissions(role),
       isActive: true,
       lastLoginAt: undefined,
-      workloadSettings: {
-        maxAssignedIssues: undefined,
-        availableHours: {
-          monday: { start: "09:00", end: "17:00" },
-          tuesday: { start: "09:00", end: "17:00" },
-          wednesday: { start: "09:00", end: "17:00" },
-          thursday: { start: "09:00", end: "17:00" },
-          friday: { start: "09:00", end: "17:00" },
-          saturday: { start: "09:00", end: "17:00" },
-          sunday: { start: "09:00", end: "17:00" },
-        },
-        autoAssignment: true,
-        categories: [],
-      },
-      notificationPreferences: {
-        emailNotifications: true,
-        smsNotifications: false,
-        pushNotifications: true,
-        notifyOnAssignment: true,
-        notifyOnStatusChange: true,
-        notifyOnNewComment: true,
-        quietHours: {
-          enabled: false,
-          start: "22:00",
-          end: "08:00",
-        },
-      },
     };
 
     const createdUser = await dbQueries.createItem<User>(

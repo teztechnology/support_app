@@ -134,7 +134,7 @@ export function ApplicationModal({
             <span className="text-sm text-gray-700">Active</span>
           </label>
           <p className="mt-1 text-xs text-gray-500">
-            Inactive applications won't appear in issue creation forms
+            Inactive applications won&apos;t appear in issue creation forms
           </p>
         </div>
 
