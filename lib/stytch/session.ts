@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { authenticateB2BSession, deleteB2BSession } from './server-client'
+import { authenticateB2BSession, deleteB2BSession, getStytchB2BServerClient } from './server-client'
 import { dbQueries } from '@/lib/cosmos/queries'
 import { SessionData, User, Organization } from '@/types'
 
@@ -77,27 +77,27 @@ export class SessionManager {
       const memberId = response.member_session.member_id
       const organizationId = process.env.NEXT_PUBLIC_STYTCH_BUSINESS_ORG_ID!
 
-      // Skip member details fetch for now to avoid the body consumption error
-      // This is a temporary fix - we can add member details later if needed
+      // Fetch member details to get proper name and email
       let memberDetails: any = null
-      // try {
-      //   const memberResponse = await client.organizations.members.get({
-      //     organization_id: organizationId,
-      //     member_id: memberId,
-      //   })
-      //   memberDetails = memberResponse.member
-      // } catch (error) {
-      //   console.log('Could not get member details in SessionManager:', error)
-      // }
+      try {
+        const memberResponse = await client.organizations.members.get({
+          organization_id: organizationId,
+          member_id: memberId,
+        })
+        memberDetails = memberResponse.member
+      } catch (error) {
+        console.log('Could not get member details in SessionManager:', error)
+      }
 
       // Return session data with available information
       const sessionData: SessionData = {
         userId: memberId,
         organizationId: organizationId,
+        stytchOrganizationId: organizationId, // The organizationId from JWT is the Stytch org ID
         stytchSessionId: response.member_session.member_session_id,
         stytchMemberId: memberId,
         userRole: 'admin', // Default role for now
-        permissions: ['issues:read', 'issues:write', 'customers:read', 'customers:write'],
+        permissions: ['issues:read', 'issues:write', 'customers:read', 'customers:write', 'settings:read', 'settings:write'],
         organizationName: 'Support Organization', // Default for now
         userName: memberDetails?.name || memberDetails?.email_address || memberId,
         userEmail: memberDetails?.email_address || '',
@@ -208,6 +208,62 @@ export class SessionManager {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }, organization.id)
+  }
+
+  static async getOrganizationMembers(organizationId: string, limit: number = 100): Promise<any[]> {
+    try {
+      if (!organizationId) {
+        console.error('Organization ID is null or undefined')
+        return []
+      }
+      
+      // For now, we'll use a placeholder implementation
+      // In a real implementation, you might need to paginate through members
+      console.warn('getOrganizationMembers: Using limited implementation. Consider implementing pagination.')
+      return []
+    } catch (error) {
+      console.error('Failed to fetch organization members:', error)
+      return []
+    }
+  }
+
+  static async searchOrganizationMembersByEmail(organizationId: string, emailQuery: string): Promise<any[]> {
+    try {
+      if (!organizationId || !emailQuery) {
+        return []
+      }
+      
+      const trimmedEmail = emailQuery.trim()
+      
+      // Only search if it looks like a complete email address
+      if (!trimmedEmail.includes('@') || trimmedEmail.length < 5) {
+        return []
+      }
+      
+      const client = getStytchB2BServerClient()
+      
+      // Use Stytch B2B API to get member by exact email address
+      try {
+        const memberResponse = await client.organizations.members.get({
+          organization_id: organizationId,
+          email_address: trimmedEmail,
+        })
+        
+        if (memberResponse && memberResponse.member) {
+          return [memberResponse.member]
+        }
+      } catch (memberError: any) {
+        // If member not found (404), that's expected - don't log
+        if (memberError?.status_code !== 404) {
+          console.error('Error getting member by email:', memberError)
+        }
+      }
+      
+      return []
+    } catch (error) {
+      console.error('Failed to search organization members:', error)
+      return []
+    }
   }
 
 }

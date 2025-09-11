@@ -9,6 +9,7 @@ export interface Issue {
   status: IssueStatus
   priority: IssuePriority
   category?: string
+  applicationId?: string
   customerId: string
   assignedToId?: string
   organizationId: string
@@ -87,8 +88,21 @@ export interface Category {
   name: string
   description: string
   organizationId: string
+  applicationId: string
   isActive: boolean
   color?: string
+  createdAt: string
+  updatedAt: string
+  _ts?: number
+  _etag?: string
+}
+
+export interface Application {
+  id: string
+  name: string
+  description: string
+  organizationId: string
+  isActive: boolean
   createdAt: string
   updatedAt: string
   _ts?: number
@@ -101,9 +115,9 @@ export interface Comment {
   userId: string
   userName: string
   content: string
-  isInternal: boolean
   createdAt: string
   attachments: string[]
+  organizationId: string
   _ts?: number
   _etag?: string
 }
@@ -140,6 +154,7 @@ export interface ActivityItem {
 export interface SessionData {
   userId: string
   organizationId: string
+  stytchOrganizationId: string
   stytchSessionId: string
   stytchMemberId: string
   userRole: UserRole

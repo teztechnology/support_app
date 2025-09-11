@@ -65,7 +65,7 @@ async function checkAuth() {
       userName: memberDetails?.name || memberDetails?.email_address || memberId,
       userEmail: memberDetails?.email_address || '',
       userRole: 'admin', // Default role for now
-      permissions: ['issues:read', 'issues:write', 'customers:read', 'customers:write'],
+      permissions: ['issues:read', 'issues:write', 'customers:read', 'customers:write', 'settings:read', 'settings:write'],
       stytchSessionId: response.member_session.member_session_id,
       stytchMemberId: memberId,
       expiresAt: response.member_session.expires_at,
@@ -92,10 +92,8 @@ export default async function DashboardLayout({
   
   // Redirect to login if authentication failed
   if (!session) {
-    redirect('/login')
+    redirect('/auth/login')
   }
-  
-  // Database initialization now happens at startup via instrumentation
 
   return (
     <div className="min-h-screen bg-gray-50">

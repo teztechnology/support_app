@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Multi-tenant software support issue tracking application',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode

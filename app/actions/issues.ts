@@ -23,6 +23,7 @@ export async function createIssue(prevState: any, formData: FormData): Promise<S
       description: formData.get('description'),
       priority: formData.get('priority'),
       category: formData.get('category') || undefined,
+      applicationId: formData.get('applicationId') || undefined,
       customerId: formData.get('customerId'),
       assignedToId: formData.get('assignedToId') || undefined,
     })
@@ -34,7 +35,7 @@ export async function createIssue(prevState: any, formData: FormData): Promise<S
       }
     }
 
-    const { title, description, priority, category, customerId, assignedToId } = validatedFields.data
+    const { title, description, priority, category, applicationId, customerId, assignedToId } = validatedFields.data
 
     const customer = await dbQueries.getItem<Customer>('customers', customerId, session.organizationId)
     if (!customer) {
@@ -50,6 +51,7 @@ export async function createIssue(prevState: any, formData: FormData): Promise<S
       status: 'new',
       priority: priority as any,
       category,
+      applicationId,
       customerId,
       assignedToId,
       organizationId: session.organizationId,
@@ -468,7 +470,6 @@ export async function addComment(prevState: any, formData: FormData): Promise<Se
     const validatedFields = AddCommentSchema.safeParse({
       issueId: formData.get('issueId'),
       content: formData.get('content'),
-      isInternal: formData.get('isInternal') === 'true',
     })
 
     if (!validatedFields.success) {
@@ -478,7 +479,7 @@ export async function addComment(prevState: any, formData: FormData): Promise<Se
       }
     }
 
-    const { issueId, content, isInternal } = validatedFields.data
+    const { issueId, content } = validatedFields.data
 
     const issue = await dbQueries.getIssueById(issueId, session.organizationId)
     if (!issue) {
@@ -493,8 +494,8 @@ export async function addComment(prevState: any, formData: FormData): Promise<Se
       userId: session.userId,
       userName: session.userName,
       content,
-      isInternal,
       attachments: [],
+      organizationId: session.organizationId,
     })
 
     const activity: ActivityItem = {
@@ -522,6 +523,34 @@ export async function addComment(prevState: any, formData: FormData): Promise<Se
     return {
       success: false,
       error: error.message || 'Failed to add comment',
+    }
+  }
+}
+
+export async function deleteComment(commentId: string, organizationId: string): Promise<ServerActionResponse<void>> {
+  try {
+    const session = await SessionManager.requirePermission('issues:write')
+    
+    // Verify the comment belongs to the same organization
+    if (session.organizationId !== organizationId) {
+      return {
+        success: false,
+        error: 'Unauthorized',
+      }
+    }
+
+    await dbQueries.deleteComment(commentId, organizationId)
+
+    revalidatePath('/issues/[id]', 'page')
+    
+    return {
+      success: true,
+    }
+  } catch (error: any) {
+    console.error('Delete comment error:', error)
+    return {
+      success: false,
+      error: error.message || 'Failed to delete comment',
     }
   }
 }

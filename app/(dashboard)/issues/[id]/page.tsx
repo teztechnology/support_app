@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SessionManager } from '@/lib/stytch/session'
 import { dbQueries } from '@/lib/cosmos/queries'
-import { updateIssue, changeIssueStatus, addComment } from '@/app/actions/issues'
+import { updateIssue, changeIssueStatus, addComment, deleteComment, assignIssue } from '@/app/actions/issues'
 import { Issue, Comment, Customer, User, IssueStatus, IssuePriority } from '@/types'
+import { CommentActions } from '@/components/comment-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,6 +95,12 @@ export default async function IssueDetailPage({ params }: PageProps) {
     await changeIssueStatus(params.id, status)
   }
 
+  async function assignUserAction(userId: string) {
+    'use server'
+    await assignIssue(params.id, userId)
+  }
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -124,7 +131,21 @@ export default async function IssueDetailPage({ params }: PageProps) {
             </div>
             <div>
               <span className="font-medium">Assigned to:</span>{' '}
-              {assignedUser ? assignedUser.name : 'Unassigned'}
+              <select 
+                value={issue.assignedToId || ''}
+                onChange={async (e) => {
+                  await assignUserAction(e.target.value)
+                  window.location.reload() // Simple refresh to show updated assignment
+                }}
+                className="ml-2 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Unassigned</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <span className="font-medium">Created:</span>{' '}
@@ -211,16 +232,7 @@ export default async function IssueDetailPage({ params }: PageProps) {
                 placeholder="Enter your comment..."
               />
             </div>
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isInternal"
-                  value="true"
-                  className="mr-2 rounded"
-                />
-                <span className="text-sm text-gray-600">Internal comment (not visible to customer)</span>
-              </label>
+            <div className="flex justify-end">
               <button
                 type="submit"
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -237,20 +249,22 @@ export default async function IssueDetailPage({ params }: PageProps) {
             <p className="text-gray-500 text-center py-4">No comments yet.</p>
           ) : (
             comments.map((comment) => (
-              <div key={comment.id} className={`border rounded-md p-4 ${comment.isInternal ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50'}`}>
+              <div key={comment.id} className="border rounded-md p-4 bg-gray-50">
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-900">{comment.userName}</span>
-                    {comment.isInternal && (
-                      <span className="px-2 py-1 text-xs bg-yellow-200 text-yellow-800 rounded-full">
-                        Internal
-                      </span>
-                    )}
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(comment.createdAt).toLocaleDateString()} at{' '}
-                    {new Date(comment.createdAt).toLocaleTimeString()}
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm text-gray-500">
+                      {new Date(comment.createdAt).toLocaleDateString()} at{' '}
+                      {new Date(comment.createdAt).toLocaleTimeString()}
+                    </span>
+                    <CommentActions
+                      commentId={comment.id}
+                      organizationId={session.organizationId}
+                      canDelete={comment.userId === session.userId || session.userRole === 'admin'}
+                    />
+                  </div>
                 </div>
                 <div className="whitespace-pre-wrap text-gray-700">
                   {comment.content}

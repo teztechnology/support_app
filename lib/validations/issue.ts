@@ -7,6 +7,7 @@ export const CreateIssueSchema = z.object({
     required_error: 'Priority is required'
   }),
   category: z.string().optional(),
+  applicationId: z.string().optional(),
   customerId: z.string().min(1, 'Customer is required'),
   assignedToId: z.string().optional(),
 })
@@ -53,7 +54,6 @@ export const IssueFilterSchema = z.object({
 export const AddCommentSchema = z.object({
   issueId: z.string().min(1, 'Issue ID is required'),
   content: z.string().min(1, 'Comment content is required').max(2000, 'Comment must be less than 2000 characters'),
-  isInternal: z.boolean().default(false),
 })
 
 export type CreateIssueInput = z.infer<typeof CreateIssueSchema>

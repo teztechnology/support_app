@@ -1,32 +1,62 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal } from './modal'
-import { Customer, Category, IssuePriority } from '@/types'
+import { Customer, Category, Application, User, IssuePriority } from '@/types'
 
 interface IssueModalProps {
   isOpen: boolean
   onClose: () => void
   customers: Customer[]
   categories: Category[]
+  applications?: Application[]
+  users?: User[]
+  preselectedCustomerId?: string
   onSubmit: (data: {
     title: string
     description: string
     priority: IssuePriority
     customerId: string
     category?: string
+    applicationId?: string
+    assignedToId?: string
   }) => Promise<void>
 }
 
-export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }: IssueModalProps) {
+export function IssueModal({ isOpen, onClose, customers, categories, applications = [], users = [], preselectedCustomerId, onSubmit }: IssueModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     priority: 'medium' as IssuePriority,
     customerId: '',
-    category: ''
+    category: '',
+    applicationId: '',
+    assignedToId: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (isOpen && preselectedCustomerId) {
+      setFormData(prev => ({
+        ...prev,
+        customerId: preselectedCustomerId
+      }))
+    }
+  }, [isOpen, preselectedCustomerId])
+
+  // Filter categories based on selected application
+  const availableCategories = formData.applicationId 
+    ? categories.filter(cat => cat.applicationId === formData.applicationId)
+    : []
+
+  // Clear category when application changes
+  const handleApplicationChange = (applicationId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      applicationId,
+      category: '' // Clear category when application changes
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,7 +69,9 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
         description: formData.description.trim(),
         priority: formData.priority,
         customerId: formData.customerId,
-        category: formData.category || undefined
+        category: formData.category || undefined,
+        applicationId: formData.applicationId || undefined,
+        assignedToId: formData.assignedToId || undefined
       })
       onClose()
       setFormData({
@@ -47,7 +79,9 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
         description: '',
         priority: 'medium',
         customerId: '',
-        category: ''
+        category: '',
+        applicationId: '',
+        assignedToId: ''
       })
     } catch (error) {
       console.error('Failed to create issue:', error)
@@ -64,7 +98,9 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
         description: '',
         priority: 'medium',
         customerId: '',
-        category: ''
+        category: '',
+        applicationId: '',
+        assignedToId: ''
       })
     }
   }
@@ -111,7 +147,7 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
               Priority *
@@ -132,6 +168,31 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
           </div>
 
           <div>
+            <label htmlFor="applicationId" className="block text-sm font-medium text-gray-700 mb-1">
+              Application
+            </label>
+            <select
+              id="applicationId"
+              value={formData.applicationId}
+              onChange={(e) => handleApplicationChange(e.target.value)}
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            >
+              <option value="">Select application</option>
+              {applications.map((application) => (
+                <option key={application.id} value={application.id}>
+                  {application.name}
+                </option>
+              ))}
+            </select>
+            {applications.length === 0 && (
+              <p className="text-sm text-gray-500 mt-1">
+                No applications found. Add applications in Settings.
+              </p>
+            )}
+          </div>
+
+          <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
               Category
             </label>
@@ -139,16 +200,23 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
               id="category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.applicationId}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
             >
-              <option value="">Select category</option>
-              {categories.map((category) => (
+              <option value="">
+                {formData.applicationId ? 'Select category' : 'Select application first'}
+              </option>
+              {availableCategories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
                 </option>
               ))}
             </select>
+            {formData.applicationId && availableCategories.length === 0 && (
+              <p className="text-sm text-gray-500 mt-1">
+                No categories found for this application. Add categories in Settings.
+              </p>
+            )}
           </div>
         </div>
 
@@ -174,6 +242,31 @@ export function IssueModal({ isOpen, onClose, customers, categories, onSubmit }:
           {customers.length === 0 && (
             <p className="text-sm text-gray-500 mt-1">
               No customers found. Please add a customer first.
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="assignedToId" className="block text-sm font-medium text-gray-700 mb-1">
+            Assign to
+          </label>
+          <select
+            id="assignedToId"
+            value={formData.assignedToId}
+            onChange={(e) => setFormData({ ...formData, assignedToId: e.target.value })}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+          >
+            <option value="">Unassigned</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </select>
+          {users.length === 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              No users found. Issues will remain unassigned.
             </p>
           )}
         </div>

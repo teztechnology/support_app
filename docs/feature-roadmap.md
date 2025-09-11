@@ -1,242 +1,150 @@
-# Feature Roadmap
+# Feature Roadmap - Support Issue Tracking Application
 
-## Core Issue Management
+## Current Status (✅ Completed Features)
 
-### Issue Assignment System
-**Status**: Planned  
-**Priority**: High
+### Core Application Structure
+- ✅ **Multi-tenant Architecture**: Azure Cosmos DB with organization partitioning
+- ✅ **Authentication**: Stytch B2B integration with JWT tokens
+- ✅ **User Management**: Role-based permissions (admin, support_agent, read_only)
+- ✅ **Session Management**: Secure cookie-based authentication
 
-**Description**: Allow support agents to assign issues to specific team members for resolution tracking and workload distribution.
+### Issue Management System
+- ✅ **Full Issue CRUD**: Create, read, update, delete support issues
+- ✅ **Issue Assignment**: Assign issues to team members
+- ✅ **Status Workflow**: New → In Progress → Awaiting Customer → Resolved → Closed
+- ✅ **Priority System**: Critical, High, Medium, Low priority levels
+- ✅ **Comment System**: Add comments and updates to issues
+- ✅ **Issue Detail View**: Complete issue information with activity history
 
-**Features**:
-- Assign issues to individual users within the organization
-- Bulk assignment capabilities
-- Auto-assignment rules based on categories/priority
-- Assignment history tracking
-- Workload balancing indicators
+### Customer Management
+- ✅ **Customer CRUD**: Full customer management system
+- ✅ **Customer-Issue Linking**: Issues linked to customer records
+- ✅ **Customer Dashboard**: View all issues for a specific customer
 
-**Database Schema Changes**:
-```typescript
-interface Issue {
-  assignedTo?: string // User ID
-  assignedAt?: string // ISO timestamp
-  assignedBy?: string // User ID who made assignment
-  assignmentHistory?: AssignmentHistoryEntry[]
-}
+### Organization & Settings
+- ✅ **Applications**: Define applications/products for issue categorization
+- ✅ **Categories**: Organize issues by application and category
+- ✅ **User Search**: Search and add Stytch organization members
+- ✅ **Settings Dashboard**: Manage applications, categories, and users
 
-interface AssignmentHistoryEntry {
-  userId: string
-  assignedBy: string
-  assignedAt: string
-  unassignedAt?: string
-  reason?: string
-}
-```
+### Dashboard & Navigation
+- ✅ **Main Dashboard**: Overview of issues, stats, and recent activity
+- ✅ **Responsive Navigation**: Sidebar navigation with proper authentication
+- ✅ **Issue Lists**: Filterable and sortable issue lists
 
-### Issue Categories & Tags
-**Status**: Planned  
-**Priority**: High
+## Next Priority Features
 
-**Description**: Organize issues with categories, subcategories, and flexible tagging system for better organization and reporting.
+### 1. Jira & Claude API Integration (High Priority)
+**Target**: Next 2-3 sprints
 
-**Features**:
-- Predefined categories (Technical, Billing, Feature Request, Bug Report, etc.)
-- Custom subcategories per organization
-- Free-form tags for additional classification
-- Category-based routing rules
-- Category templates with predefined fields
+**Phase 1: Basic Jira Integration**
+- Install Jira REST API client
+- Add "Escalate to Jira" functionality
+- Link support issues to Jira tickets
+- Basic project and issue type selection
 
-**Database Schema**:
-```typescript
-interface IssueCategory {
-  id: string
-  name: string
-  description: string
-  color: string
-  organizationId: string
-  parentCategoryId?: string // For subcategories
-  isActive: boolean
-  defaultPriority?: 'low' | 'medium' | 'high' | 'urgent'
-  templateFields?: CategoryField[]
-}
+**Phase 2: Claude API Integration**
+- AI-powered bug report generation
+- Analyze support issues and generate structured development tickets
+- Review/edit AI-generated content before Jira creation
+- Effort estimation and priority suggestions
 
-interface CategoryField {
-  name: string
-  type: 'text' | 'number' | 'select' | 'multiselect' | 'date'
-  required: boolean
-  options?: string[] // For select/multiselect
-}
+**Phase 3: Configuration**
+- Jira connection settings in Settings page
+- Project mapping per application
+- Claude prompt customization
 
-interface Issue {
-  categoryId?: string
-  subcategoryId?: string
-  tags: string[]
-  customFields?: Record<string, any>
-}
-```
-
-### Repeat Issue Tracking
-**Status**: Planned  
-**Priority**: Medium
-
-**Description**: Identify and track recurring issues from the same customer or similar problem patterns to improve resolution efficiency.
-
-**Features**:
-- Automatic duplicate detection based on content similarity
-- Manual issue linking/merging
-- Pattern recognition for similar issues
-- Escalation rules for repeated issues
-- Customer issue history view
-- Root cause analysis tracking
-
-**Database Schema**:
-```typescript
-interface Issue {
-  parentIssueId?: string // For duplicates/related issues
-  relatedIssueIds: string[]
-  duplicateCount: number
-  similarityScore?: number // ML-based similarity
-  rootCauseId?: string
-}
-
-interface RootCause {
-  id: string
-  title: string
-  description: string
-  organizationId: string
-  relatedIssueIds: string[]
-  resolution?: string
-  preventionSteps?: string[]
-  createdAt: string
-  updatedAt: string
-}
-```
-
-## Advanced Features
-
-### Advanced Search & Filtering
-**Status**: Planned  
-**Priority**: Medium
-
-**Features**:
+### 2. Advanced Search & Filtering (Medium Priority)
 - Full-text search across issue content
-- Advanced filters (date range, status, assignee, category, customer)
+- Advanced filter combinations
 - Saved search queries
-- Search result highlighting
 - Export filtered results
+- Search highlighting
 
-### Email Integration
-**Status**: Planned  
-**Priority**: Medium
-
-**Features**:
+### 3. Email Integration (Medium Priority)
 - Create issues from incoming emails
 - Send notifications on issue updates
 - Email templates for common responses
 - Customer reply integration
-- SMTP/IMAP configuration
 
-### File Attachments
-**Status**: Planned  
-**Priority**: Medium
-
-**Features**:
-- File upload support for issues and comments
+### 4. File Attachments (Medium Priority)
+- Upload files to issues and comments
 - Image preview capabilities
-- File size and type restrictions
-- Cloud storage integration (Azure Blob Storage)
-- Attachment versioning
+- Azure Blob Storage integration
+- File versioning and management
+
+## Future Features (Low Priority)
 
 ### Time Tracking
-**Status**: Planned  
-**Priority**: Low
-
-**Features**:
 - Track time spent on issues
-- Billable/non-billable time categorization
+- Billable/non-billable categorization
 - Time reporting and analytics
-- Timer functionality for active work
-- Time entry approval workflow
+- Timer functionality
 
-### SLA Management
-**Status**: Planned  
-**Priority**: Low
-
-**Features**:
+### SLA Management  
 - Define SLA rules by priority/category
-- Automatic SLA breach warnings
+- Automatic breach warnings
 - Response time tracking
-- Resolution time metrics
-- SLA performance reports
-- Escalation automation
-
-### Jira Integration
-**Status**: Planned  
-**Priority**: High
-
-**Description**: Seamless integration between support issues and Jira bug tracking for escalation to development teams.
-
-**Features**:
-- Manual escalation: Convert support issues to Jira bugs
-- Bidirectional synchronization of status, priority, and comments
-- Auto-escalation rules based on patterns and conditions
-- Webhook integration for real-time updates
-- Pattern recognition for automatic bug detection
-- Field mapping configuration between systems
-
-**Database Schema**:
-```typescript
-interface Issue {
-  jiraIntegration?: JiraIntegration
-  escalationReason?: string
-  escalatedBy?: string
-  escalatedAt?: string
-  autoEscalationTriggered?: boolean
-}
-
-interface JiraIntegration {
-  jiraIssueKey: string
-  jiraIssueId: string
-  jiraUrl: string
-  jiraProject: string
-  jiraStatus: string
-  jiraPriority: string
-  jiraAssignee?: string
-  createdAt: string
-  lastSyncAt: string
-  syncEnabled: boolean
-}
-```
+- Performance metrics
 
 ### Knowledge Base Integration
-**Status**: Planned  
-**Priority**: Low
-
-**Features**:
-- Link issues to knowledge base articles
+- Link issues to KB articles
 - Suggest relevant articles during issue creation
-- Create KB articles from resolved issues
+- Create articles from resolved issues
 - Customer self-service portal
-- Article usage analytics
 
-## Implementation Priority
+### Advanced Analytics
+- Custom reporting dashboard
+- Issue trends and patterns
+- Team performance metrics
+- Customer satisfaction tracking
 
-### Phase 1 (Next Sprint)
-1. Issue Assignment System
-2. Issue Categories & Tags
-3. Basic issue CRUD operations
+## Removed/Deprecated Features
 
-### Phase 2 (Following Sprint)
-1. Repeat Issue Tracking
-2. Jira Integration (manual escalation)
-3. Advanced Search & Filtering
+### ❌ Items No Longer Needed
+- **Complex Bidirectional Jira Sync**: Replaced with simplified one-way escalation
+- **Automatic Bug Detection**: Too complex for initial implementation
+- **Real-time Collaboration**: Not required for MVP
+- **Mobile App**: Web responsive is sufficient
+- **Advanced Workflow Engine**: Current status workflow is adequate
 
-### Phase 3 (Third Sprint)
-1. Jira Integration (bidirectional sync & auto-escalation)
-2. Email notifications
-3. File Attachments
+## Implementation Notes
 
-### Phase 4 (Future)
-1. Time Tracking
-2. SLA Management
-3. Knowledge Base Integration
+### Completed Architecture Decisions
+- ✅ Next.js 14 App Router with Server Actions
+- ✅ Azure Cosmos DB for data persistence
+- ✅ Stytch B2B for authentication
+- ✅ Tailwind CSS for styling
+- ✅ Server Components for performance
+- ✅ Multi-tenant data isolation
+
+### Current Technical Debt
+- Consider pagination for large issue lists
+- Add proper error boundaries
+- Implement proper loading states
+- Add comprehensive form validation
+- Consider caching for frequently accessed data
+
+### Success Metrics
+- ✅ Basic issue tracking workflow functional
+- ✅ User authentication and permissions working
+- ✅ Multi-tenant data isolation verified
+- 🎯 Next: Jira escalation workflow
+- 🎯 Target: AI-powered bug report generation
+
+## Development Timeline
+
+### Completed (✅)
+- **Sprint 1-3**: Core authentication and database setup
+- **Sprint 4-6**: Issue management CRUD operations  
+- **Sprint 7-8**: Customer management and assignments
+- **Sprint 9-10**: Settings, applications, and categories
+- **Sprint 11**: Navigation fixes and UI polish
+
+### Upcoming
+- **Sprint 12-13**: Jira integration (Phase 1)
+- **Sprint 14**: Claude API integration (Phase 2)  
+- **Sprint 15**: Configuration and settings (Phase 3)
+- **Sprint 16+**: Advanced search and email integration
+
+The application has evolved from a basic concept to a fully functional support ticket system with multi-tenant architecture, comprehensive issue management, and user-friendly interfaces. The next major milestone is intelligent escalation to development teams via Jira and Claude API integration.

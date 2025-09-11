@@ -158,13 +158,11 @@ interface Comment {
   id: string                   // Comment identifier
   organizationId: string       // Partition key
   issueId: string             // Parent issue
-  authorId: string            // User who created comment
-  authorName: string          // Denormalized for performance
+  userId: string              // User who created comment
+  userName: string            // User name for display
   content: string             // Comment text
-  isInternal: boolean         // Internal note vs customer-visible
-  attachmentIds: string[]     // References to attachments
+  attachments: string[]       // References to attachments
   createdAt: string
-  updatedAt?: string
 }
 ```
 

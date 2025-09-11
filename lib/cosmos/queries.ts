@@ -1,11 +1,13 @@
 import { Container, SqlQuerySpec, FeedOptions } from '@azure/cosmos'
 import { cosmosClient } from './client'
+import { generateId } from '@/lib/utils'
 import { 
   Issue, 
   Customer, 
   User, 
   Organization, 
   Category, 
+  Application,
   Comment, 
   FilterParams,
   ActivityItem,
@@ -253,6 +255,86 @@ export class CosmosDBQueries {
     return this.queryItems<Category>('categories', querySpec)
   }
 
+  async getCategoriesByApplication(organizationId: string, applicationId: string): Promise<Category[]> {
+    const querySpec: SqlQuerySpec = {
+      query: 'SELECT * FROM c WHERE c.organizationId = @organizationId AND c.applicationId = @applicationId AND c.isActive = true ORDER BY c.name ASC',
+      parameters: [
+        { name: '@organizationId', value: organizationId },
+        { name: '@applicationId', value: applicationId }
+      ]
+    }
+    return this.queryItems<Category>('categories', querySpec)
+  }
+
+  async createCategory(category: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Promise<Category> {
+    const newCategory: Category = {
+      ...category,
+      id: generateId('category'),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    return this.createItem<Category>('categories', newCategory, category.organizationId)
+  }
+
+  async updateCategory(id: string, organizationId: string, updates: Partial<Category>): Promise<Category> {
+    const existingCategory = await this.getItem<Category>('categories', id, organizationId)
+    if (!existingCategory) {
+      throw new Error('Category not found')
+    }
+
+    const updatedCategory = {
+      ...existingCategory,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+
+    return this.updateItem<Category>('categories', id, updatedCategory, organizationId)
+  }
+
+  async deleteCategory(id: string, organizationId: string): Promise<void> {
+    await this.deleteItem('categories', id, organizationId)
+  }
+
+  async getApplications(organizationId: string): Promise<Application[]> {
+    const querySpec: SqlQuerySpec = {
+      query: 'SELECT * FROM c WHERE c.organizationId = @organizationId AND c.isActive = true ORDER BY c.name ASC',
+      parameters: [{ name: '@organizationId', value: organizationId }]
+    }
+
+    return this.queryItems<Application>('applications', querySpec)
+  }
+
+  async createApplication(application: Omit<Application, 'id' | 'createdAt' | 'updatedAt'>): Promise<Application> {
+    const newApplication: Application = {
+      ...application,
+      id: generateId('application'),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    return this.createItem<Application>('applications', newApplication, application.organizationId)
+  }
+
+  async updateApplication(id: string, organizationId: string, updates: Partial<Application>): Promise<Application> {
+    const existingApplication = await this.getItem<Application>('applications', id, organizationId)
+    if (!existingApplication) {
+      throw new Error('Application not found')
+    }
+
+    const updatedApplication = {
+      ...existingApplication,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    }
+
+    return this.updateItem<Application>('applications', id, updatedApplication, organizationId)
+  }
+
+  async deleteApplication(id: string, organizationId: string): Promise<void> {
+    await this.deleteItem('applications', id, organizationId)
+  }
+
   async getComments(issueId: string, organizationId: string): Promise<Comment[]> {
     const querySpec: SqlQuerySpec = {
       query: 'SELECT * FROM c WHERE c.issueId = @issueId ORDER BY c.createdAt ASC',
@@ -262,17 +344,18 @@ export class CosmosDBQueries {
     return this.queryItems<Comment>('comments', querySpec)
   }
 
-  async addComment(comment: Omit<Comment, 'id' | 'createdAt'>): Promise<Comment> {
+  async addComment(comment: Omit<Comment, 'id' | 'createdAt' | 'organizationId'> & { organizationId: string }): Promise<Comment> {
     const newComment: Comment = {
       ...comment,
       id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString(),
     }
 
-    const issue = await this.getItem<Issue>('issues', comment.issueId, 'organizationId')
-    const organizationId = issue?.organizationId || 'default'
+    return this.createItem<Comment>('comments', newComment, comment.organizationId)
+  }
 
-    return this.createItem<Comment>('comments', newComment, organizationId)
+  async deleteComment(commentId: string, organizationId: string): Promise<void> {
+    await this.deleteItem('comments', commentId, organizationId)
   }
 
   async getDashboardStats(organizationId: string, dateRange?: { start: string; end: string }): Promise<DashboardStats> {

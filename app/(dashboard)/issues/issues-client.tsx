@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Issue, Customer, Category, IssueStatus, IssuePriority } from '@/types'
+import { Issue, Customer, Category, Application, User, IssueStatus, IssuePriority } from '@/types'
 import { IssueModal } from '@/components/issue-modal'
 import { createIssue } from '@/app/actions/issues'
 
@@ -10,6 +10,8 @@ interface IssuesClientProps {
   initialIssues: Issue[]
   customers: Customer[]
   categories: Category[]
+  applications: Application[]
+  users: User[]
 }
 
 function getStatusBadgeColor(status: IssueStatus): string {
@@ -44,7 +46,7 @@ function getPriorityBadgeColor(priority: IssuePriority): string {
   }
 }
 
-export function IssuesClient({ initialIssues, customers, categories }: IssuesClientProps) {
+export function IssuesClient({ initialIssues, customers, categories, applications, users }: IssuesClientProps) {
   const [issues, setIssues] = useState(initialIssues)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -54,6 +56,7 @@ export function IssuesClient({ initialIssues, customers, categories }: IssuesCli
     priority: IssuePriority
     customerId: string
     category?: string
+    assignedToId?: string
   }) => {
     try {
       // Create a FormData object to match the existing server action signature
@@ -64,6 +67,9 @@ export function IssuesClient({ initialIssues, customers, categories }: IssuesCli
       formData.append('customerId', data.customerId)
       if (data.category) {
         formData.append('category', data.category)
+      }
+      if (data.assignedToId) {
+        formData.append('assignedToId', data.assignedToId)
       }
 
       // Call the server action - it will redirect to the new issue page
@@ -176,6 +182,8 @@ export function IssuesClient({ initialIssues, customers, categories }: IssuesCli
         onClose={() => setIsModalOpen(false)}
         customers={customers}
         categories={categories}
+        applications={applications}
+        users={users}
         onSubmit={handleCreateIssue}
       />
     </div>

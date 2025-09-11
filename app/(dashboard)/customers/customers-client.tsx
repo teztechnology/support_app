@@ -2,18 +2,25 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Customer } from '@/types'
+import { Customer, Category, Application, User } from '@/types'
 import { CustomerModal } from '@/components/customer-modal'
+import { IssueModal } from '@/components/issue-modal'
 import { createCustomer, updateCustomer, deleteCustomer } from '@/app/actions/customers'
+import { createIssue } from '@/app/actions/issues'
 
 interface CustomersClientProps {
   initialCustomers: Customer[]
+  categories: Category[]
+  applications: Application[]
+  users: User[]
 }
 
-export function CustomersClient({ initialCustomers }: CustomersClientProps) {
+export function CustomersClient({ initialCustomers, categories, applications, users }: CustomersClientProps) {
   const [customers, setCustomers] = useState(initialCustomers)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
+  const [isIssueModalOpen, setIsIssueModalOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>()
+  const [selectedCustomerForIssue, setSelectedCustomerForIssue] = useState<string | undefined>()
 
   const handleCreateCustomer = async (data: { companyName: string }) => {
     try {
@@ -51,19 +58,60 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
     }
   }
 
+  const handleCreateIssue = async (data: {
+    title: string
+    description: string
+    priority: any
+    customerId: string
+    category?: string
+    applicationId?: string
+  }) => {
+    try {
+      const formData = new FormData()
+      formData.append('title', data.title)
+      formData.append('description', data.description)
+      formData.append('priority', data.priority)
+      formData.append('customerId', data.customerId)
+      if (data.category) {
+        formData.append('category', data.category)
+      }
+      if (data.applicationId) {
+        formData.append('applicationId', data.applicationId)
+      }
+      
+      const result = await createIssue(null, formData)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create issue')
+      }
+    } catch (error) {
+      console.error('Failed to create issue:', error)
+      throw error
+    }
+  }
+
   const openCreateModal = () => {
     setEditingCustomer(undefined)
-    setIsModalOpen(true)
+    setIsCustomerModalOpen(true)
   }
 
   const openEditModal = (customer: Customer) => {
     setEditingCustomer(customer)
-    setIsModalOpen(true)
+    setIsCustomerModalOpen(true)
   }
 
-  const closeModal = () => {
-    setIsModalOpen(false)
+  const closeCustomerModal = () => {
+    setIsCustomerModalOpen(false)
     setEditingCustomer(undefined)
+  }
+
+  const openIssueModal = (customerId: string) => {
+    setSelectedCustomerForIssue(customerId)
+    setIsIssueModalOpen(true)
+  }
+
+  const closeIssueModal = () => {
+    setIsIssueModalOpen(false)
+    setSelectedCustomerForIssue(undefined)
   }
 
   return (
@@ -146,12 +194,12 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
                       >
                         Edit
                       </button>
-                      <Link
-                        href="/issues"
+                      <button
+                        onClick={() => openIssueModal(customer.id)}
                         className="text-green-600 hover:text-green-900"
                       >
                         Create Issue
-                      </Link>
+                      </button>
                       {customer.totalIssues === 0 && (
                         <button
                           onClick={() => handleDeleteCustomer(customer.id)}
@@ -170,10 +218,21 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
       )}
 
       <CustomerModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
+        isOpen={isCustomerModalOpen}
+        onClose={closeCustomerModal}
         customer={editingCustomer}
         onSubmit={editingCustomer ? handleUpdateCustomer : handleCreateCustomer}
+      />
+
+      <IssueModal
+        isOpen={isIssueModalOpen}
+        onClose={closeIssueModal}
+        customers={customers}
+        categories={categories}
+        applications={applications}
+        users={users}
+        preselectedCustomerId={selectedCustomerForIssue}
+        onSubmit={handleCreateIssue}
       />
     </div>
   )

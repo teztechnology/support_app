@@ -11,7 +11,7 @@ export function Navigation({ userRole }: NavigationProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/', label: 'Dashboard' },
     { href: '/issues', label: 'Issues' },
     { href: '/customers', label: 'Customers' },
     { href: '/reports', label: 'Reports' },

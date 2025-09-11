@@ -171,7 +171,7 @@ function ActivitySkeleton() {
   )
 }
 
-export default function DashboardPage() {
+export default function HomePage() {
   return (
     <div>
       <div className="mb-8">
