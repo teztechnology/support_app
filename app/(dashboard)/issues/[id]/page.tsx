@@ -111,8 +111,9 @@ export default async function IssueDetailPage({ params }: PageProps) {
     await changeIssueStatus(params.id, status);
   }
 
-  async function assignUserAction(userId: string) {
+  async function assignUserAction(formData: FormData) {
     "use server";
+    const userId = formData.get("userId") as string;
     await assignIssue(params.id, userId);
   }
 
@@ -152,21 +153,7 @@ export default async function IssueDetailPage({ params }: PageProps) {
             </div>
             <div>
               <span className="font-medium">Assigned to:</span>{" "}
-              <select
-                value={issue.assignedToId || ""}
-                onChange={async (e) => {
-                  await assignUserAction(e.target.value);
-                  window.location.reload(); // Simple refresh to show updated assignment
-                }}
-                className="ml-2 rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Unassigned</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
+              {assignedUser ? assignedUser.name : "Unassigned"}
             </div>
             <div>
               <span className="font-medium">Created:</span>{" "}
@@ -202,41 +189,69 @@ export default async function IssueDetailPage({ params }: PageProps) {
         <h3 className="mb-4 text-lg font-medium text-gray-900">
           Quick Actions
         </h3>
-        <div className="flex flex-wrap gap-4">
-          <form action={changeStatusAction}>
-            <input type="hidden" name="status" value="in_progress" />
-            <button
-              type="submit"
-              disabled={issue.status === "in_progress"}
-              className="rounded-md bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Mark In Progress
-            </button>
-          </form>
+        <div className="space-y-4">
+          {/* Assignment Section */}
+          <div className="flex items-center gap-4">
+            <span className="font-medium text-gray-700">Assign to:</span>
+            <form action={assignUserAction} className="flex items-center gap-2">
+              <select
+                name="userId"
+                defaultValue={issue.assignedToId || ""}
+                className="rounded border border-gray-300 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Unassigned</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+              >
+                Assign
+              </button>
+            </form>
+          </div>
 
-          <form action={changeStatusAction}>
-            <input type="hidden" name="status" value="resolved" />
-            <button
-              type="submit"
-              disabled={
-                issue.status === "resolved" || issue.status === "closed"
-              }
-              className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Mark Resolved
-            </button>
-          </form>
+          {/* Status Actions */}
+          <div className="flex flex-wrap gap-4">
+            <form action={changeStatusAction}>
+              <input type="hidden" name="status" value="in_progress" />
+              <button
+                type="submit"
+                disabled={issue.status === "in_progress"}
+                className="rounded-md bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Mark In Progress
+              </button>
+            </form>
 
-          <form action={changeStatusAction}>
-            <input type="hidden" name="status" value="awaiting_customer" />
-            <button
-              type="submit"
-              disabled={issue.status === "awaiting_customer"}
-              className="rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Awaiting Customer
-            </button>
-          </form>
+            <form action={changeStatusAction}>
+              <input type="hidden" name="status" value="resolved" />
+              <button
+                type="submit"
+                disabled={
+                  issue.status === "resolved" || issue.status === "closed"
+                }
+                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Mark Resolved
+              </button>
+            </form>
+
+            <form action={changeStatusAction}>
+              <input type="hidden" name="status" value="awaiting_customer" />
+              <button
+                type="submit"
+                disabled={issue.status === "awaiting_customer"}
+                className="rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Awaiting Customer
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
