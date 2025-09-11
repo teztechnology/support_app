@@ -262,7 +262,7 @@ export default async function IssueDetailPage({ params }: PageProps) {
         </h3>
 
         {/* Add Comment Form */}
-        <form action={addCommentAction} className="mb-6">
+        <form key={comments.length} action={addCommentAction} className="mb-6">
           <input type="hidden" name="issueId" value={issue.id} />
           <div className="space-y-4">
             <div>
