@@ -18,6 +18,8 @@ import {
   IssuePriority,
 } from "@/types";
 import { CommentActions } from "@/components/comment-actions";
+import { IssueStatusSelector } from "@/components/issue-status-selector";
+import { IssueAssignmentToggle } from "@/components/issue-assignment-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -37,8 +39,6 @@ function getStatusBadgeColor(status: IssueStatus): string {
       return "bg-purple-100 text-purple-800";
     case "resolved":
       return "bg-green-100 text-green-800";
-    case "closed":
-      return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -105,33 +105,18 @@ export default async function IssueDetailPage({ params }: PageProps) {
     await addComment(null, formData);
   }
 
-  async function changeStatusAction(formData: FormData) {
-    "use server";
-    const status = formData.get("status") as IssueStatus;
-    await changeIssueStatus(params.id, status);
-  }
-
-  async function assignUserAction(formData: FormData) {
-    "use server";
-    const userId = formData.get("userId") as string;
-    await assignIssue(params.id, userId);
-  }
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link href="/issues" className="text-blue-600 hover:text-blue-800">
-            ← Back to Issues
-          </Link>
+          <span className="text-sm font-medium text-gray-700">Status:</span>
+          <IssueStatusSelector
+            issueId={issue.id}
+            currentStatus={issue.status}
+          />
         </div>
         <div className="flex items-center space-x-2">
-          <span
-            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(issue.status)}`}
-          >
-            {issue.status.replace("_", " ")}
-          </span>
           <span
             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
           >
@@ -151,10 +136,12 @@ export default async function IssueDetailPage({ params }: PageProps) {
               <span className="font-medium">Customer:</span>{" "}
               {customer ? customer.companyName : "Unknown Customer"}
             </div>
-            <div>
-              <span className="font-medium">Assigned to:</span>{" "}
-              {assignedUser ? assignedUser.name : "Unassigned"}
-            </div>
+            <IssueAssignmentToggle
+              issueId={issue.id}
+              currentAssignedToId={issue.assignedToId}
+              assignedUser={assignedUser || undefined}
+              users={users}
+            />
             <div>
               <span className="font-medium">Created:</span>{" "}
               {new Date(issue.createdAt).toLocaleDateString()} at{" "}
@@ -182,77 +169,6 @@ export default async function IssueDetailPage({ params }: PageProps) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Actions */}
-      <div className="rounded-lg bg-white p-6 shadow">
-        <h3 className="mb-4 text-lg font-medium text-gray-900">
-          Quick Actions
-        </h3>
-        <div className="space-y-4">
-          {/* Assignment Section */}
-          <div className="flex items-center gap-4">
-            <span className="font-medium text-gray-700">Assign to:</span>
-            <form action={assignUserAction} className="flex items-center gap-2">
-              <select
-                name="userId"
-                defaultValue={issue.assignedToId || ""}
-                className="rounded border border-gray-300 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Unassigned</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
-              >
-                Assign
-              </button>
-            </form>
-          </div>
-
-          {/* Status Actions */}
-          <div className="flex flex-wrap gap-4">
-            <form action={changeStatusAction}>
-              <input type="hidden" name="status" value="in_progress" />
-              <button
-                type="submit"
-                disabled={issue.status === "in_progress"}
-                className="rounded-md bg-yellow-600 px-4 py-2 text-white hover:bg-yellow-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Mark In Progress
-              </button>
-            </form>
-
-            <form action={changeStatusAction}>
-              <input type="hidden" name="status" value="resolved" />
-              <button
-                type="submit"
-                disabled={
-                  issue.status === "resolved" || issue.status === "closed"
-                }
-                className="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Mark Resolved
-              </button>
-            </form>
-
-            <form action={changeStatusAction}>
-              <input type="hidden" name="status" value="awaiting_customer" />
-              <button
-                type="submit"
-                disabled={issue.status === "awaiting_customer"}
-                className="rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Awaiting Customer
-              </button>
-            </form>
-          </div>
-        </div>
       </div>
 
       {/* Comments */}

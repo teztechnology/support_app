@@ -2,8 +2,7 @@ export type IssueStatus =
   | "new"
   | "in_progress"
   | "awaiting_customer"
-  | "resolved"
-  | "closed";
+  | "resolved";
 export type IssuePriority = "critical" | "high" | "medium" | "low";
 export type UserRole = "admin" | "support_agent" | "read_only";
 

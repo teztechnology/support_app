@@ -30,7 +30,7 @@ export const UpdateIssueSchema = z.object({
     .max(5000, "Description must be less than 5000 characters")
     .optional(),
   status: z
-    .enum(["new", "in_progress", "awaiting_customer", "resolved", "closed"])
+    .enum(["new", "in_progress", "awaiting_customer", "resolved"])
     .optional(),
   priority: z.enum(["critical", "high", "medium", "low"]).optional(),
   category: z.string().optional(),
@@ -46,7 +46,7 @@ export const BulkUpdateIssuesSchema = z.object({
   updates: z
     .object({
       status: z
-        .enum(["new", "in_progress", "awaiting_customer", "resolved", "closed"])
+        .enum(["new", "in_progress", "awaiting_customer", "resolved"])
         .optional(),
       priority: z.enum(["critical", "high", "medium", "low"]).optional(),
       assignedToId: z.string().optional(),
@@ -59,9 +59,7 @@ export const BulkUpdateIssuesSchema = z.object({
 
 export const IssueFilterSchema = z.object({
   status: z
-    .array(
-      z.enum(["new", "in_progress", "awaiting_customer", "resolved", "closed"])
-    )
+    .array(z.enum(["new", "in_progress", "awaiting_customer", "resolved"]))
     .optional(),
   priority: z.array(z.enum(["critical", "high", "medium", "low"])).optional(),
   assignedToId: z.string().optional(),

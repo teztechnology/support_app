@@ -500,7 +500,6 @@ export class CosmosDBQueries {
       awaiting_customer: issues.filter((i) => i.status === "awaiting_customer")
         .length,
       resolved: issues.filter((i) => i.status === "resolved").length,
-      closed: issues.filter((i) => i.status === "closed").length,
     };
 
     const issuesByPriority: Record<IssuePriority, number> = {

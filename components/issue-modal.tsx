@@ -72,7 +72,9 @@ export function IssueModal({
     if (
       !formData.title.trim() ||
       !formData.description.trim() ||
-      !formData.customerId
+      !formData.customerId ||
+      !formData.applicationId ||
+      !formData.category
     )
       return;
 
@@ -204,12 +206,13 @@ export function IssueModal({
               htmlFor="applicationId"
               className="mb-1 block text-sm font-medium text-gray-700"
             >
-              Application
+              Application *
             </label>
             <select
               id="applicationId"
               value={formData.applicationId}
               onChange={(e) => handleApplicationChange(e.target.value)}
+              required
               disabled={isSubmitting}
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
@@ -232,7 +235,7 @@ export function IssueModal({
               htmlFor="category"
               className="mb-1 block text-sm font-medium text-gray-700"
             >
-              Category
+              Category *
             </label>
             <select
               id="category"
@@ -240,6 +243,7 @@ export function IssueModal({
               onChange={(e) =>
                 setFormData({ ...formData, category: e.target.value })
               }
+              required
               disabled={isSubmitting || !formData.applicationId}
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >

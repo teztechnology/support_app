@@ -32,8 +32,6 @@ function getStatusBadgeColor(status: IssueStatus): string {
       return "bg-purple-100 text-purple-800";
     case "resolved":
       return "bg-green-100 text-green-800";
-    case "closed":
-      return "bg-gray-100 text-gray-800";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -99,6 +97,12 @@ export function IssuesClient({
     return customer?.companyName || customerId;
   };
 
+  const getApplicationName = (applicationId?: string) => {
+    if (!applicationId) return "N/A";
+    const application = applications.find((a) => a.id === applicationId);
+    return application?.name || applicationId;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -144,54 +148,51 @@ export function IssuesClient({
                   Customer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Created
+                  Application
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Actions
+                  Created
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {issues.map((issue) => (
-                <tr key={issue.id} className="hover:bg-gray-50">
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {issue.title}
+                <tr key={issue.id} className="cursor-pointer hover:bg-gray-50">
+                  <Link href={`/issues/${issue.id}`} className="contents">
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {issue.title}
+                        </div>
+                        <div className="max-w-md truncate text-sm text-gray-500">
+                          {issue.description}
+                        </div>
                       </div>
-                      <div className="max-w-md truncate text-sm text-gray-500">
-                        {issue.description}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(issue.status)}`}
-                    >
-                      {issue.status.replace("_", " ")}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
-                    >
-                      {issue.priority}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                    {getCustomerName(issue.customerId)}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {new Date(issue.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    <Link
-                      href={`/issues/${issue.id}`}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      View
-                    </Link>
-                  </td>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(issue.status)}`}
+                      >
+                        {issue.status.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
+                      >
+                        {issue.priority}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      {getCustomerName(issue.customerId)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                      {getApplicationName(issue.applicationId)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {new Date(issue.createdAt).toLocaleDateString()}
+                    </td>
+                  </Link>
                 </tr>
               ))}
             </tbody>
