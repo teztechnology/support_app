@@ -259,7 +259,7 @@ export function SettingsClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
       </div>
 
@@ -270,10 +270,10 @@ export function SettingsClient({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium ${
                 activeTab === tab.id
                   ? "border-blue-500 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
               {tab.label}
@@ -358,17 +358,17 @@ function ApplicationsSection({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Applications & Categories</h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="mt-1 text-sm text-gray-600">
             Manage applications and their associated categories for issue
             tracking
           </p>
         </div>
         <button
           onClick={onAdd}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+          className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
         >
           Add Application
         </button>
@@ -376,12 +376,12 @@ function ApplicationsSection({
 
       {applications.length === 0 ? (
         <Card>
-          <CardContent className="text-center py-8 text-gray-500">
+          <CardContent className="py-8 text-center text-gray-500">
             <p>
               No applications found. Create your first application to get
               started.
             </p>
-            <p className="text-sm mt-2">
+            <p className="mt-2 text-sm">
               Applications help organize issues by the specific software or
               service they relate to.
             </p>
@@ -403,7 +403,7 @@ function ApplicationsSection({
                         {application.name}
                       </CardTitle>
                       <span
-                        className={`px-2 py-1 text-xs rounded-full ${
+                        className={`rounded-full px-2 py-1 text-xs ${
                           application.isActive
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
@@ -415,14 +415,14 @@ function ApplicationsSection({
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => onEdit(application)}
-                        className="text-blue-600 hover:text-blue-900 text-sm"
+                        className="text-sm text-blue-600 hover:text-blue-900"
                       >
                         Edit App
                       </button>
                       {applicationCategories.length === 0 && (
                         <button
                           onClick={() => onDelete(application.id)}
-                          className="text-red-600 hover:text-red-900 text-sm"
+                          className="text-sm text-red-600 hover:text-red-900"
                         >
                           Delete App
                         </button>
@@ -443,20 +443,20 @@ function ApplicationsSection({
                       </h4>
                       <button
                         onClick={() => onAddCategory(application.id)}
-                        className="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                        className="text-sm font-medium text-blue-600 hover:text-blue-900"
                       >
                         Add Category
                       </button>
                     </div>
 
                     {applicationCategories.length === 0 ? (
-                      <div className="text-center py-4 text-gray-500 bg-gray-50 rounded-md">
+                      <div className="rounded-md bg-gray-50 py-4 text-center text-gray-500">
                         <p className="text-sm">
                           No categories for this application yet.
                         </p>
                         <button
                           onClick={() => onAddCategory(application.id)}
-                          className="text-blue-600 hover:text-blue-900 text-sm mt-1"
+                          className="mt-1 text-sm text-blue-600 hover:text-blue-900"
                         >
                           Create the first category
                         </button>
@@ -466,17 +466,17 @@ function ApplicationsSection({
                         {applicationCategories.map((category) => (
                           <div
                             key={category.id}
-                            className="flex items-center justify-between p-3 border border-gray-200 rounded-md"
+                            className="flex items-center justify-between rounded-md border border-gray-200 p-3"
                           >
                             <div className="flex items-center space-x-3">
                               {category.color && (
                                 <div
-                                  className="w-3 h-3 rounded-full"
+                                  className="h-3 w-3 rounded-full"
                                   style={{ backgroundColor: category.color }}
                                 />
                               )}
                               <div>
-                                <p className="font-medium text-sm">
+                                <p className="text-sm font-medium">
                                   {category.name}
                                 </p>
                                 {category.description && (
@@ -488,7 +488,7 @@ function ApplicationsSection({
                             </div>
                             <div className="flex items-center space-x-2">
                               <span
-                                className={`px-2 py-1 text-xs rounded-full ${
+                                className={`rounded-full px-2 py-1 text-xs ${
                                   category.isActive
                                     ? "bg-green-100 text-green-800"
                                     : "bg-gray-100 text-gray-800"
@@ -498,13 +498,13 @@ function ApplicationsSection({
                               </span>
                               <button
                                 onClick={() => onEditCategory(category)}
-                                className="text-blue-600 hover:text-blue-900 text-xs"
+                                className="text-xs text-blue-600 hover:text-blue-900"
                               >
                                 Edit
                               </button>
                               <button
                                 onClick={() => onDeleteCategory(category.id)}
-                                className="text-red-600 hover:text-red-900 text-xs"
+                                className="text-xs text-red-600 hover:text-red-900"
                               >
                                 Delete
                               </button>
@@ -523,7 +523,6 @@ function ApplicationsSection({
     </div>
   );
 }
-
 
 interface UsersSectionProps {
   databaseUsers: User[];
@@ -728,11 +727,11 @@ function UsersSection({
                 placeholder="Enter complete email address (e.g., user@company.com)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {isSearching && (
                 <div className="absolute right-3 top-2.5">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-blue-600"></div>
                 </div>
               )}
             </div>
@@ -744,10 +743,10 @@ function UsersSection({
                   searchResults.map((member) => (
                     <div
                       key={member.member_id}
-                      className="flex items-center justify-between p-3 border rounded-lg bg-blue-50"
+                      className="flex items-center justify-between rounded-lg border bg-blue-50 p-3"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                           <span className="text-sm font-medium text-blue-600">
                             {(member.name ||
                               member.email_address)[0]?.toUpperCase()}
@@ -764,7 +763,7 @@ function UsersSection({
                       </div>
                       <div className="flex items-center space-x-2">
                         <select
-                          className="px-3 py-1 border border-gray-300 rounded text-sm"
+                          className="rounded border border-gray-300 px-3 py-1 text-sm"
                           defaultValue="support_agent"
                           id={`role-${member.member_id}`}
                         >
@@ -780,7 +779,7 @@ function UsersSection({
                             handleAddUser(member.member_id, select.value);
                           }}
                           disabled={isLoading}
-                          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+                          className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 disabled:opacity-50"
                         >
                           Add
                         </button>
@@ -788,22 +787,22 @@ function UsersSection({
                     </div>
                   ))
                 ) : !isSearching && foundButExists ? (
-                  <div className="text-center py-6 text-amber-600 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 py-6 text-center text-amber-600">
                     <p className="font-medium">
                       User &ldquo;{foundButExists.email_address}&rdquo; found in
                       organization
                     </p>
-                    <p className="text-sm mt-1">
+                    <p className="mt-1 text-sm">
                       This user has already been added to the support tool
                     </p>
-                    <p className="text-xs mt-2 text-amber-700">
+                    <p className="mt-2 text-xs text-amber-700">
                       Check the &ldquo;Active Users&rdquo; section below
                     </p>
                   </div>
                 ) : !isSearching ? (
-                  <div className="text-center py-6 text-gray-500">
+                  <div className="py-6 text-center text-gray-500">
                     <p>No users found matching &ldquo;{searchQuery}&rdquo;</p>
-                    <p className="text-sm mt-1">
+                    <p className="mt-1 text-sm">
                       Try searching with a different email address
                     </p>
                   </div>
@@ -812,7 +811,7 @@ function UsersSection({
             )}
 
             {searchQuery.length > 0 && !searchQuery.includes("@") && (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="py-4 text-center text-sm text-gray-500">
                 Please enter a complete email address
               </div>
             )}
@@ -831,10 +830,10 @@ function UsersSection({
         <CardContent>
           <div className="space-y-3">
             {activeUsers.map((databaseUser) => (
-              <div key={databaseUser.id} className="border rounded-lg">
+              <div key={databaseUser.id} className="rounded-lg border">
                 <div className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                       <span className="text-sm font-medium text-blue-600">
                         {databaseUser.name[0]?.toUpperCase()}
                       </span>
@@ -848,7 +847,7 @@ function UsersSection({
                   </div>
                   <div className="flex items-center space-x-2">
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(
+                      className={`rounded-full px-2 py-1 text-xs font-medium ${getRoleBadgeColor(
                         databaseUser.role
                       )}`}
                     >
@@ -862,7 +861,7 @@ function UsersSection({
                             : databaseUser.id
                         )
                       }
-                      className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                      className="rounded border border-gray-300 px-3 py-1 text-sm hover:bg-gray-50"
                     >
                       {expandedUser === databaseUser.id ? "Collapse" : "Manage"}
                     </button>
@@ -870,14 +869,14 @@ function UsersSection({
                 </div>
 
                 {expandedUser === databaseUser.id && (
-                  <div className="border-t p-3 bg-gray-50 space-y-3">
+                  <div className="space-y-3 border-t bg-gray-50 p-3">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
                           Role
                         </label>
                         <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded"
+                          className="w-full rounded border border-gray-300 px-3 py-2"
                           value={databaseUser.role}
                           onChange={(e) => {
                             const newPermissions = getDefaultPermissions(
@@ -896,7 +895,7 @@ function UsersSection({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
                           Status
                         </label>
                         <div className="flex space-x-2">
@@ -905,14 +904,14 @@ function UsersSection({
                               handleToggleActivation(databaseUser.id)
                             }
                             disabled={isLoading}
-                            className="px-3 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 disabled:opacity-50"
+                            className="rounded bg-yellow-600 px-3 py-2 text-sm text-white hover:bg-yellow-700 disabled:opacity-50"
                           >
                             Deactivate
                           </button>
                           <button
                             onClick={() => handleRemoveUser(databaseUser.id)}
                             disabled={isLoading}
-                            className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                            className="rounded bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-50"
                           >
                             Remove
                           </button>
@@ -920,14 +919,14 @@ function UsersSection({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="mb-1 block text-sm font-medium text-gray-700">
                         Permissions
                       </label>
                       <div className="grid grid-cols-3 gap-2 text-xs">
                         {databaseUser.permissions.map((permission) => (
                           <span
                             key={permission}
-                            className="px-2 py-1 bg-blue-100 text-blue-800 rounded"
+                            className="rounded bg-blue-100 px-2 py-1 text-blue-800"
                           >
                             {permission}
                           </span>
@@ -939,7 +938,7 @@ function UsersSection({
               </div>
             ))}
             {activeUsers.length === 0 && (
-              <div className="text-center py-6 text-gray-500">
+              <div className="py-6 text-center text-gray-500">
                 <p>No active users in the tool.</p>
               </div>
             )}
@@ -961,10 +960,10 @@ function UsersSection({
               {inactiveUsers.map((databaseUser) => (
                 <div
                   key={databaseUser.id}
-                  className="flex items-center justify-between p-3 border rounded-lg bg-gray-50"
+                  className="flex items-center justify-between rounded-lg border bg-gray-50 p-3"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-300">
                       <span className="text-sm font-medium text-gray-600">
                         {databaseUser.name[0]?.toUpperCase()}
                       </span>
@@ -979,20 +978,20 @@ function UsersSection({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                    <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
                       Inactive
                     </span>
                     <button
                       onClick={() => handleToggleActivation(databaseUser.id)}
                       disabled={isLoading}
-                      className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+                      className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700 disabled:opacity-50"
                     >
                       Reactivate
                     </button>
                     <button
                       onClick={() => handleRemoveUser(databaseUser.id)}
                       disabled={isLoading}
-                      className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:opacity-50"
+                      className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700 disabled:opacity-50"
                     >
                       Remove
                     </button>

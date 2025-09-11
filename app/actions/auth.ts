@@ -1,67 +1,76 @@
-'use server'
+"use server";
 
-import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
-import { authenticateB2BSession, getB2BOrganization, inviteB2BMember } from '@/lib/stytch/server-client'
-import { SessionManager } from '@/lib/stytch/session'
-import { dbQueries } from '@/lib/cosmos/queries'
-import { LoginSchema, SignupSchema, InviteUserSchema, UpdateUserRoleSchema } from '@/lib/validations/auth'
-import { ServerActionResponse, Organization, User } from '@/types'
-import { generateId } from '@/lib/utils'
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import {
+  authenticateB2BSession,
+  getB2BOrganization,
+  inviteB2BMember,
+} from "@/lib/stytch/server-client";
+import { SessionManager } from "@/lib/stytch/session";
+import { dbQueries } from "@/lib/cosmos/queries";
+import {
+  LoginSchema,
+  SignupSchema,
+  InviteUserSchema,
+  UpdateUserRoleSchema,
+} from "@/lib/validations/auth";
+import { ServerActionResponse, Organization, User } from "@/types";
+import { generateId } from "@/lib/utils";
 
 function getDefaultPermissions(role: string): string[] {
   switch (role) {
-    case 'admin':
+    case "admin":
       return [
-        'issues:read',
-        'issues:write',
-        'issues:delete',
-        'customers:read',
-        'customers:write',
-        'users:read',
-        'users:write',
-        'reports:read',
-        'settings:write'
-      ]
-    case 'support_agent':
+        "issues:read",
+        "issues:write",
+        "issues:delete",
+        "customers:read",
+        "customers:write",
+        "users:read",
+        "users:write",
+        "reports:read",
+        "settings:write",
+      ];
+    case "support_agent":
       return [
-        'issues:read',
-        'issues:write',
-        'customers:read',
-        'customers:write',
-        'reports:read'
-      ]
-    case 'read_only':
+        "issues:read",
+        "issues:write",
+        "customers:read",
+        "customers:write",
+        "reports:read",
+      ];
+    case "read_only":
     default:
-      return ['issues:read', 'customers:read']
+      return ["issues:read", "customers:read"];
   }
 }
 
 export async function authenticateUser(): Promise<ServerActionResponse> {
   try {
-    const session = await SessionManager.validateSession()
+    const session = await SessionManager.validateSession();
     return {
       success: !!session,
       data: session,
-    }
+    };
   } catch (error) {
     return {
       success: false,
-      error: 'Authentication failed',
-    }
+      error: "Authentication failed",
+    };
   }
 }
 
 export async function logoutUser(): Promise<ServerActionResponse> {
   try {
-    await SessionManager.revokeSession()
-    redirect('/login')
+    await SessionManager.revokeSession();
+    redirect("/login");
   } catch (error) {
-    console.error('Logout error:', error)
+    console.error("Logout error:", error);
     return {
       success: false,
-      error: 'Logout failed',
-    }
+      error: "Logout failed",
+    };
   }
 }
 
@@ -73,52 +82,63 @@ export async function handleStytchCallback(
     const stytchResponse = await authenticateB2BSession(
       stytchToken,
       stytchOrganizationId
-    )
+    );
 
-    if (!stytchResponse.session || !stytchResponse.member || !stytchResponse.organization) {
+    if (
+      !stytchResponse.session ||
+      !stytchResponse.member ||
+      !stytchResponse.organization
+    ) {
       return {
         success: false,
-        error: 'Invalid authentication response from Stytch',
-      }
+        error: "Invalid authentication response from Stytch",
+      };
     }
 
     let organization = await dbQueries.getOrganizationByStytchId(
       stytchResponse.organization.organization_id
-    )
+    );
 
     if (!organization) {
-      organization = await dbQueries.createItem<Organization>('organizations', {
-        id: generateId('org'),
-        name: stytchResponse.organization.organization_name,
-        stytchOrganizationId: stytchResponse.organization.organization_id,
-        domain: stytchResponse.organization.email_allowed_domains?.[0],
-        settings: {
-          allowSelfRegistration: true,
-          defaultUserRole: 'read_only',
-          requireApproval: false,
-          customFields: [],
-          branding: {},
+      organization = await dbQueries.createItem<Organization>(
+        "organizations",
+        {
+          id: generateId("org"),
+          name: stytchResponse.organization.organization_name,
+          stytchOrganizationId: stytchResponse.organization.organization_id,
+          domain: stytchResponse.organization.email_allowed_domains?.[0],
+          settings: {
+            allowSelfRegistration: true,
+            defaultUserRole: "read_only",
+            requireApproval: false,
+            customFields: [],
+            branding: {},
+          },
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }, generateId('org'))
+        generateId("org")
+      );
     }
 
-    let user = await dbQueries.getUserByStytchMemberId(stytchResponse.member.member_id)
+    let user = await dbQueries.getUserByStytchMemberId(
+      stytchResponse.member.member_id
+    );
 
     if (!user) {
-      const isFirstUser = (await dbQueries.getUsers(organization.id)).length === 0
-      
+      const isFirstUser =
+        (await dbQueries.getUsers(organization.id)).length === 0;
+
       user = await SessionManager.createUserFromStytchMember(
         stytchResponse.member,
         organization,
-        isFirstUser ? 'admin' : organization.settings.defaultUserRole
-      )
+        isFirstUser ? "admin" : organization.settings.defaultUserRole
+      );
     }
 
     await dbQueries.updateItem<User>(
-      'users',
+      "users",
       user.id,
       {
         ...user,
@@ -126,9 +146,9 @@ export async function handleStytchCallback(
         updatedAt: new Date().toISOString(),
       },
       user.organizationId
-    )
+    );
 
-    await SessionManager.setSessionCookies(stytchToken, organization.id)
+    await SessionManager.setSessionCookies(stytchToken, organization.id);
 
     return {
       success: true,
@@ -137,114 +157,128 @@ export async function handleStytchCallback(
         organizationId: organization.id,
         userRole: user.role,
       },
-    }
+    };
   } catch (error) {
-    console.error('Stytch callback error:', error)
+    console.error("Stytch callback error:", error);
     return {
       success: false,
-      error: 'Authentication failed',
-    }
+      error: "Authentication failed",
+    };
   }
 }
 
-export async function inviteUser(prevState: any, formData: FormData): Promise<ServerActionResponse> {
+export async function inviteUser(
+  prevState: any,
+  formData: FormData
+): Promise<ServerActionResponse> {
   try {
-    const session = await SessionManager.requireRole(['admin'])
-    
+    const session = await SessionManager.requireRole(["admin"]);
+
     const validatedFields = InviteUserSchema.safeParse({
-      email: formData.get('email'),
-      name: formData.get('name'),
-      role: formData.get('role'),
-    })
+      email: formData.get("email"),
+      name: formData.get("name"),
+      role: formData.get("role"),
+    });
 
     if (!validatedFields.success) {
       return {
         success: false,
         errors: validatedFields.error.flatten().fieldErrors,
-      }
+      };
     }
 
-    const { email, name, role } = validatedFields.data
+    const { email, name, role } = validatedFields.data;
 
     const organization = await dbQueries.getItem<Organization>(
-      'organizations',
+      "organizations",
       session.organizationId,
       session.organizationId
-    )
+    );
 
     if (!organization) {
       return {
         success: false,
-        error: 'Organization not found',
-      }
+        error: "Organization not found",
+      };
     }
 
     const stytchOrg = await getB2BOrganization(
       organization.stytchOrganizationId
-    )
+    );
 
-    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`
-    
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`;
+
     await inviteB2BMember(
       organization.stytchOrganizationId,
       email,
       inviteUrl,
       name
-    )
+    );
 
-    revalidatePath('/settings/team')
-    
+    revalidatePath("/settings/team");
+
     return {
       success: true,
       data: { email, name, role },
-    }
+    };
   } catch (error: any) {
-    console.error('Invite user error:', error)
+    console.error("Invite user error:", error);
     return {
       success: false,
-      error: error.message || 'Failed to invite user',
-    }
+      error: error.message || "Failed to invite user",
+    };
   }
 }
 
-export async function updateUserRole(prevState: any, formData: FormData): Promise<ServerActionResponse> {
+export async function updateUserRole(
+  prevState: any,
+  formData: FormData
+): Promise<ServerActionResponse> {
   try {
-    const session = await SessionManager.requireRole(['admin'])
-    
+    const session = await SessionManager.requireRole(["admin"]);
+
     const validatedFields = UpdateUserRoleSchema.safeParse({
-      userId: formData.get('userId'),
-      role: formData.get('role'),
-      permissions: formData.get('permissions')?.toString().split(',').filter(Boolean),
-    })
+      userId: formData.get("userId"),
+      role: formData.get("role"),
+      permissions: formData
+        .get("permissions")
+        ?.toString()
+        .split(",")
+        .filter(Boolean),
+    });
 
     if (!validatedFields.success) {
       return {
         success: false,
         errors: validatedFields.error.flatten().fieldErrors,
-      }
+      };
     }
 
-    const { userId, role, permissions } = validatedFields.data
+    const { userId, role, permissions } = validatedFields.data;
 
     if (userId === session.userId) {
       return {
         success: false,
-        error: 'You cannot change your own role',
-      }
+        error: "You cannot change your own role",
+      };
     }
 
-    const user = await dbQueries.getItem<User>('users', userId, session.organizationId)
+    const user = await dbQueries.getItem<User>(
+      "users",
+      userId,
+      session.organizationId
+    );
     if (!user) {
       return {
         success: false,
-        error: 'User not found',
-      }
+        error: "User not found",
+      };
     }
 
-    const defaultPermissions = getDefaultPermissions(role)
+    const defaultPermissions = getDefaultPermissions(role);
 
     const updatedUser = await dbQueries.updateItem<User>(
-      'users',
+      "users",
       userId,
       {
         ...user,
@@ -253,44 +287,50 @@ export async function updateUserRole(prevState: any, formData: FormData): Promis
         updatedAt: new Date().toISOString(),
       },
       session.organizationId
-    )
+    );
 
-    revalidatePath('/settings/team')
-    
+    revalidatePath("/settings/team");
+
     return {
       success: true,
       data: updatedUser,
-    }
+    };
   } catch (error: any) {
-    console.error('Update user role error:', error)
+    console.error("Update user role error:", error);
     return {
       success: false,
-      error: error.message || 'Failed to update user role',
-    }
+      error: error.message || "Failed to update user role",
+    };
   }
 }
 
-export async function deactivateUser(userId: string): Promise<ServerActionResponse> {
+export async function deactivateUser(
+  userId: string
+): Promise<ServerActionResponse> {
   try {
-    const session = await SessionManager.requireRole(['admin'])
-    
+    const session = await SessionManager.requireRole(["admin"]);
+
     if (userId === session.userId) {
       return {
         success: false,
-        error: 'You cannot deactivate yourself',
-      }
+        error: "You cannot deactivate yourself",
+      };
     }
 
-    const user = await dbQueries.getItem<User>('users', userId, session.organizationId)
+    const user = await dbQueries.getItem<User>(
+      "users",
+      userId,
+      session.organizationId
+    );
     if (!user) {
       return {
         success: false,
-        error: 'User not found',
-      }
+        error: "User not found",
+      };
     }
 
     const updatedUser = await dbQueries.updateItem<User>(
-      'users',
+      "users",
       userId,
       {
         ...user,
@@ -298,60 +338,66 @@ export async function deactivateUser(userId: string): Promise<ServerActionRespon
         updatedAt: new Date().toISOString(),
       },
       session.organizationId
-    )
+    );
 
-    revalidatePath('/settings/team')
-    
+    revalidatePath("/settings/team");
+
     return {
       success: true,
       data: updatedUser,
-    }
+    };
   } catch (error: any) {
-    console.error('Deactivate user error:', error)
+    console.error("Deactivate user error:", error);
     return {
       success: false,
-      error: error.message || 'Failed to deactivate user',
-    }
+      error: error.message || "Failed to deactivate user",
+    };
   }
 }
 
 export async function getCurrentUser(): Promise<ServerActionResponse<User>> {
   try {
-    const session = await SessionManager.requireAuth()
-    const user = await dbQueries.getItem<User>('users', session.userId, session.organizationId)
-    
+    const session = await SessionManager.requireAuth();
+    const user = await dbQueries.getItem<User>(
+      "users",
+      session.userId,
+      session.organizationId
+    );
+
     if (!user) {
       return {
         success: false,
-        error: 'User not found',
-      }
+        error: "User not found",
+      };
     }
 
     return {
       success: true,
       data: user,
-    }
+    };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || 'Failed to get current user',
-    }
+      error: error.message || "Failed to get current user",
+    };
   }
 }
 
-export async function getOrganizationUsers(): Promise<ServerActionResponse<User[]>> {
+export async function getOrganizationUsers(): Promise<
+  ServerActionResponse<User[]>
+> {
   try {
-    const session = await SessionManager.requireAuth()
-    const users = await dbQueries.getUsers(session.organizationId)
-    
+    const session = await SessionManager.requireAuth();
+    const users = await dbQueries.getUsers(session.organizationId);
+
     return {
       success: true,
       data: users,
-    }
+    };
   } catch (error: any) {
     return {
       success: false,
-      error: error.message || 'Failed to get organization users',
-    }
+      error: error.message || "Failed to get organization users",
+    };
   }
 }

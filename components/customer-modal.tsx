@@ -1,53 +1,61 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Modal } from './modal'
-import { Customer } from '@/types'
+import { useState } from "react";
+import { Modal } from "./modal";
+import { Customer } from "@/types";
 
 interface CustomerModalProps {
-  isOpen: boolean
-  onClose: () => void
-  customer?: Customer
-  onSubmit: (data: { companyName: string }) => Promise<void>
+  isOpen: boolean;
+  onClose: () => void;
+  customer?: Customer;
+  onSubmit: (data: { companyName: string }) => Promise<void>;
 }
 
-export function CustomerModal({ isOpen, onClose, customer, onSubmit }: CustomerModalProps) {
-  const [companyName, setCompanyName] = useState(customer?.companyName || '')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export function CustomerModal({
+  isOpen,
+  onClose,
+  customer,
+  onSubmit,
+}: CustomerModalProps) {
+  const [companyName, setCompanyName] = useState(customer?.companyName || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!companyName.trim()) return
+    e.preventDefault();
+    if (!companyName.trim()) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      await onSubmit({ companyName: companyName.trim() })
-      onClose()
-      setCompanyName('')
+      await onSubmit({ companyName: companyName.trim() });
+      onClose();
+      setCompanyName("");
     } catch (error) {
-      console.error('Failed to save customer:', error)
+      console.error("Failed to save customer:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      onClose()
-      setCompanyName(customer?.companyName || '')
+      onClose();
+      setCompanyName(customer?.companyName || "");
     }
-  }
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={customer ? 'Edit Customer' : 'Add New Customer'}
+      title={customer ? "Edit Customer" : "Add New Customer"}
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="companyName"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Company Name *
           </label>
           <input
@@ -57,7 +65,7 @@ export function CustomerModal({ isOpen, onClose, customer, onSubmit }: CustomerM
             onChange={(e) => setCompanyName(e.target.value)}
             required
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Enter company name"
           />
         </div>
@@ -67,19 +75,19 @@ export function CustomerModal({ isOpen, onClose, customer, onSubmit }: CustomerM
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting || !companyName.trim()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? 'Saving...' : customer ? 'Update' : 'Add'} Customer
+            {isSubmitting ? "Saving..." : customer ? "Update" : "Add"} Customer
           </button>
         </div>
       </form>
     </Modal>
-  )
+  );
 }

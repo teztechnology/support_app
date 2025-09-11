@@ -1,23 +1,27 @@
-import { Suspense } from 'react'
-import { getDashboardStats, getRecentActivity } from '@/app/actions/dashboard'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatRelativeTime, getStatusColor, getPriorityColor } from '@/lib/utils'
+import { Suspense } from "react";
+import { getDashboardStats, getRecentActivity } from "@/app/actions/dashboard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  formatRelativeTime,
+  getStatusColor,
+  getPriorityColor,
+} from "@/lib/utils";
 
 async function DashboardStats() {
-  const statsResponse = await getDashboardStats()
-  
+  const statsResponse = await getDashboardStats();
+
   if (!statsResponse.success || !statsResponse.data) {
     return (
-      <div className="text-center py-8">
+      <div className="py-8 text-center">
         <p className="text-gray-500">Unable to load dashboard stats</p>
       </div>
-    )
+    );
   }
 
-  const stats = statsResponse.data
+  const stats = statsResponse.data;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-gray-600">
@@ -70,21 +74,21 @@ async function DashboardStats() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 async function RecentActivity() {
-  const activityResponse = await getRecentActivity(10)
-  
+  const activityResponse = await getRecentActivity(10);
+
   if (!activityResponse.success || !activityResponse.data) {
     return (
-      <div className="text-center py-8">
+      <div className="py-8 text-center">
         <p className="text-gray-500">No recent activity</p>
       </div>
-    )
+    );
   }
 
-  const activities = activityResponse.data
+  const activities = activityResponse.data;
 
   return (
     <Card>
@@ -94,16 +98,16 @@ async function RecentActivity() {
       <CardContent>
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">
+            <p className="py-4 text-center text-gray-500">
               No recent activity to display
             </p>
           ) : (
             activities.map((activity) => (
               <div
                 key={activity.id}
-                className="flex items-start space-x-3 p-3 rounded-lg bg-gray-50"
+                className="flex items-start space-x-3 rounded-lg bg-gray-50 p-3"
               >
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-900">
                     {activity.title}
                   </p>
@@ -130,24 +134,24 @@ async function RecentActivity() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {[...Array(4)].map((_, i) => (
         <Card key={i}>
           <CardHeader className="pb-2">
-            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-4 animate-pulse rounded bg-gray-200"></div>
           </CardHeader>
           <CardContent>
-            <div className="h-8 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-8 animate-pulse rounded bg-gray-200"></div>
           </CardContent>
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function ActivitySkeleton() {
@@ -159,16 +163,16 @@ function ActivitySkeleton() {
       <CardContent>
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="p-3 rounded-lg bg-gray-50">
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-1/3"></div>
+            <div key={i} className="rounded-lg bg-gray-50 p-3">
+              <div className="mb-2 h-4 animate-pulse rounded bg-gray-200"></div>
+              <div className="mb-2 h-3 w-2/3 animate-pulse rounded bg-gray-200"></div>
+              <div className="h-3 w-1/3 animate-pulse rounded bg-gray-200"></div>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 export default function HomePage() {
@@ -185,7 +189,7 @@ export default function HomePage() {
         <DashboardStats />
       </Suspense>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Suspense fallback={<ActivitySkeleton />}>
           <RecentActivity />
         </Suspense>
@@ -198,19 +202,19 @@ export default function HomePage() {
             <div className="space-y-3">
               <a
                 href="/issues"
-                className="block w-full bg-blue-600 text-white text-center py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                className="block w-full rounded-md bg-blue-600 px-4 py-2 text-center text-white transition-colors hover:bg-blue-700"
               >
                 Manage Issues
               </a>
               <a
                 href="/customers"
-                className="block w-full bg-green-600 text-white text-center py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                className="block w-full rounded-md bg-green-600 px-4 py-2 text-center text-white transition-colors hover:bg-green-700"
               >
                 Manage Customers
               </a>
               <a
                 href="/issues"
-                className="block w-full bg-gray-600 text-white text-center py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
+                className="block w-full rounded-md bg-gray-600 px-4 py-2 text-center text-white transition-colors hover:bg-gray-700"
               >
                 View All Issues
               </a>
@@ -219,5 +223,5 @@ export default function HomePage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

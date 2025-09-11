@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Environment files
+.env*
+
+# Logs
+*.log
+
+# Generated files
+.turbo/
+.vercel/
+
+# Package managers
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation and config files
+*.md
+docs/
+pipelines/
+.github/
+.cursor/
+.claude/
+.vscode/
+
+# Config files that should preserve their formatting
+*.json
+*.yml
+*.yaml
+*.config.js
+*.config.mjs
+*.config.ts
+tailwind.config.ts
+next.config.mjs
+jest.config.js
+jest.setup.ts
+postcss.config.mjs
+
+# Static assets
+public/

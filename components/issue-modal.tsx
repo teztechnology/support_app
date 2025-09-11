@@ -1,68 +1,82 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Modal } from './modal'
-import { Customer, Category, Application, User, IssuePriority } from '@/types'
+import { useState, useEffect } from "react";
+import { Modal } from "./modal";
+import { Customer, Category, Application, User, IssuePriority } from "@/types";
 
 interface IssueModalProps {
-  isOpen: boolean
-  onClose: () => void
-  customers: Customer[]
-  categories: Category[]
-  applications?: Application[]
-  users?: User[]
-  preselectedCustomerId?: string
+  isOpen: boolean;
+  onClose: () => void;
+  customers: Customer[];
+  categories: Category[];
+  applications?: Application[];
+  users?: User[];
+  preselectedCustomerId?: string;
   onSubmit: (data: {
-    title: string
-    description: string
-    priority: IssuePriority
-    customerId: string
-    category?: string
-    applicationId?: string
-    assignedToId?: string
-  }) => Promise<void>
+    title: string;
+    description: string;
+    priority: IssuePriority;
+    customerId: string;
+    category?: string;
+    applicationId?: string;
+    assignedToId?: string;
+  }) => Promise<void>;
 }
 
-export function IssueModal({ isOpen, onClose, customers, categories, applications = [], users = [], preselectedCustomerId, onSubmit }: IssueModalProps) {
+export function IssueModal({
+  isOpen,
+  onClose,
+  customers,
+  categories,
+  applications = [],
+  users = [],
+  preselectedCustomerId,
+  onSubmit,
+}: IssueModalProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium' as IssuePriority,
-    customerId: '',
-    category: '',
-    applicationId: '',
-    assignedToId: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    title: "",
+    description: "",
+    priority: "medium" as IssuePriority,
+    customerId: "",
+    category: "",
+    applicationId: "",
+    assignedToId: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen && preselectedCustomerId) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        customerId: preselectedCustomerId
-      }))
+        customerId: preselectedCustomerId,
+      }));
     }
-  }, [isOpen, preselectedCustomerId])
+  }, [isOpen, preselectedCustomerId]);
 
   // Filter categories based on selected application
-  const availableCategories = formData.applicationId 
-    ? categories.filter(cat => cat.applicationId === formData.applicationId)
-    : []
+  const availableCategories = formData.applicationId
+    ? categories.filter((cat) => cat.applicationId === formData.applicationId)
+    : [];
 
   // Clear category when application changes
   const handleApplicationChange = (applicationId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       applicationId,
-      category: '' // Clear category when application changes
-    }))
-  }
+      category: "", // Clear category when application changes
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.title.trim() || !formData.description.trim() || !formData.customerId) return
+    e.preventDefault();
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.customerId
+    )
+      return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await onSubmit({
         title: formData.title.trim(),
@@ -71,39 +85,39 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
         customerId: formData.customerId,
         category: formData.category || undefined,
         applicationId: formData.applicationId || undefined,
-        assignedToId: formData.assignedToId || undefined
-      })
-      onClose()
+        assignedToId: formData.assignedToId || undefined,
+      });
+      onClose();
       setFormData({
-        title: '',
-        description: '',
-        priority: 'medium',
-        customerId: '',
-        category: '',
-        applicationId: '',
-        assignedToId: ''
-      })
+        title: "",
+        description: "",
+        priority: "medium",
+        customerId: "",
+        category: "",
+        applicationId: "",
+        assignedToId: "",
+      });
     } catch (error) {
-      console.error('Failed to create issue:', error)
+      console.error("Failed to create issue:", error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      onClose()
+      onClose();
       setFormData({
-        title: '',
-        description: '',
-        priority: 'medium',
-        customerId: '',
-        category: '',
-        applicationId: '',
-        assignedToId: ''
-      })
+        title: "",
+        description: "",
+        priority: "medium",
+        customerId: "",
+        category: "",
+        applicationId: "",
+        assignedToId: "",
+      });
     }
-  }
+  };
 
   return (
     <Modal
@@ -114,51 +128,69 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="title"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Title *
           </label>
           <input
             type="text"
             id="title"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             required
             disabled={isSubmitting}
             maxLength={200}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Brief description of the issue"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="description"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Description *
           </label>
           <textarea
             id="description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             required
             disabled={isSubmitting}
             rows={4}
             maxLength={5000}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Detailed description of the issue..."
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="priority"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Priority *
             </label>
             <select
               id="priority"
               value={formData.priority}
-              onChange={(e) => setFormData({ ...formData, priority: e.target.value as IssuePriority })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  priority: e.target.value as IssuePriority,
+                })
+              }
               required
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
@@ -168,7 +200,10 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
           </div>
 
           <div>
-            <label htmlFor="applicationId" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="applicationId"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Application
             </label>
             <select
@@ -176,7 +211,7 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
               value={formData.applicationId}
               onChange={(e) => handleApplicationChange(e.target.value)}
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
               <option value="">Select application</option>
               {applications.map((application) => (
@@ -186,25 +221,32 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
               ))}
             </select>
             {applications.length === 0 && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="mt-1 text-sm text-gray-500">
                 No applications found. Add applications in Settings.
               </p>
             )}
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="category"
+              className="mb-1 block text-sm font-medium text-gray-700"
+            >
               Category
             </label>
             <select
               id="category"
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
               disabled={isSubmitting || !formData.applicationId}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             >
               <option value="">
-                {formData.applicationId ? 'Select category' : 'Select application first'}
+                {formData.applicationId
+                  ? "Select category"
+                  : "Select application first"}
               </option>
               {availableCategories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -213,24 +255,30 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
               ))}
             </select>
             {formData.applicationId && availableCategories.length === 0 && (
-              <p className="text-sm text-gray-500 mt-1">
-                No categories found for this application. Add categories in Settings.
+              <p className="mt-1 text-sm text-gray-500">
+                No categories found for this application. Add categories in
+                Settings.
               </p>
             )}
           </div>
         </div>
 
         <div>
-          <label htmlFor="customerId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="customerId"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Customer *
           </label>
           <select
             id="customerId"
             value={formData.customerId}
-            onChange={(e) => setFormData({ ...formData, customerId: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, customerId: e.target.value })
+            }
             required
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           >
             <option value="">Select customer</option>
             {customers.map((customer) => (
@@ -240,22 +288,27 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
             ))}
           </select>
           {customers.length === 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="mt-1 text-sm text-gray-500">
               No customers found. Please add a customer first.
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="assignedToId" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="assignedToId"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             Assign to
           </label>
           <select
             id="assignedToId"
             value={formData.assignedToId}
-            onChange={(e) => setFormData({ ...formData, assignedToId: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, assignedToId: e.target.value })
+            }
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           >
             <option value="">Unassigned</option>
             {users.map((user) => (
@@ -265,7 +318,7 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
             ))}
           </select>
           {users.length === 0 && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="mt-1 text-sm text-gray-500">
               No users found. Issues will remain unassigned.
             </p>
           )}
@@ -276,19 +329,24 @@ export function IssueModal({ isOpen, onClose, customers, categories, application
             type="button"
             onClick={handleClose}
             disabled={isSubmitting}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || !formData.title.trim() || !formData.description.trim() || !formData.customerId}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={
+              isSubmitting ||
+              !formData.title.trim() ||
+              !formData.description.trim() ||
+              !formData.customerId
+            }
+            className="rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? 'Creating...' : 'Create Issue'}
+            {isSubmitting ? "Creating..." : "Create Issue"}
           </button>
         </div>
       </form>
     </Modal>
-  )
+  );
 }

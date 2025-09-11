@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 const Alert = React.forwardRef<
   HTMLDivElement,
@@ -15,8 +15,8 @@ const Alert = React.forwardRef<
     )}
     {...props}
   />
-))
-Alert.displayName = "Alert"
+));
+Alert.displayName = "Alert";
 
 const AlertDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -27,7 +27,7 @@ const AlertDescription = React.forwardRef<
     className={cn("text-sm leading-relaxed", className)}
     {...props}
   />
-))
-AlertDescription.displayName = "AlertDescription"
+));
+AlertDescription.displayName = "AlertDescription";
 
-export { Alert, AlertDescription }
+export { Alert, AlertDescription };
