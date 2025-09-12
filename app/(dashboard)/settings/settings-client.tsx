@@ -18,6 +18,7 @@ import {
 import { ApplicationModal } from "@/components/application-modal";
 import { CategoryModal } from "@/components/category-modal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { JiraDiagnostic } from "@/components/jira-diagnostic";
 import { Application, Category, User, UserRole } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -29,7 +30,7 @@ interface SettingsClientProps {
   stytchOrganizationId: string;
 }
 
-type SettingsTab = "applications" | "users";
+type SettingsTab = "applications" | "users" | "diagnostic";
 
 export function SettingsClient({
   categories,
@@ -58,6 +59,7 @@ export function SettingsClient({
   const tabs = [
     { id: "applications" as const, label: "Applications", adminOnly: false },
     { id: "users" as const, label: "Users", adminOnly: true },
+    { id: "diagnostic" as const, label: "Jira Diagnostic", adminOnly: true },
   ];
 
   const visibleTabs = tabs.filter(
@@ -168,11 +170,14 @@ export function SettingsClient({
     name: string;
     description: string;
     isActive: boolean;
+    jiraProjectKey?: string;
   }) => {
     try {
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
+      if (data.jiraProjectKey)
+        formData.append("jiraProjectKey", data.jiraProjectKey);
       formData.append("isActive", data.isActive.toString());
 
       const result = await createApplication(null, formData);
@@ -191,6 +196,7 @@ export function SettingsClient({
     name: string;
     description: string;
     isActive: boolean;
+    jiraProjectKey?: string;
   }) => {
     if (!editingApplication) return;
 
@@ -198,6 +204,8 @@ export function SettingsClient({
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
+      if (data.jiraProjectKey)
+        formData.append("jiraProjectKey", data.jiraProjectKey);
       formData.append("isActive", data.isActive.toString());
 
       const result = await updateApplication(
@@ -314,6 +322,9 @@ export function SettingsClient({
               )
             }
           />
+        )}
+        {activeTab === "diagnostic" && userRole === "admin" && (
+          <JiraDiagnostic />
         )}
       </div>
 

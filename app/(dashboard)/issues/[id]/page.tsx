@@ -14,12 +14,14 @@ import {
   Comment,
   Customer,
   User,
+  Application,
   IssueStatus,
   IssuePriority,
 } from "@/types";
 import { CommentActions } from "@/components/comment-actions";
 import { IssueStatusSelector } from "@/components/issue-status-selector";
 import { IssueAssignmentToggle } from "@/components/issue-assignment-toggle";
+import { EscalateToJiraButton } from "@/components/escalate-to-jira-button";
 
 export const dynamic = "force-dynamic";
 
@@ -61,24 +63,26 @@ function getPriorityBadgeColor(priority: IssuePriority): string {
 
 async function getIssueData(issueId: string, organizationId: string) {
   try {
-    const [issue, comments, customer, users] = await Promise.all([
+    const [issue, comments, users] = await Promise.all([
       dbQueries.getIssueById(issueId, organizationId),
       dbQueries.getComments(issueId, organizationId),
-      null, // We'll get customer after we have the issue
       dbQueries.getUsers(organizationId),
     ]);
 
     if (!issue) return null;
 
-    const customerData = await dbQueries.getCustomerById(
-      issue.customerId,
-      organizationId
-    );
+    const [customerData, applicationData] = await Promise.all([
+      dbQueries.getCustomerById(issue.customerId, organizationId),
+      issue.applicationId
+        ? dbQueries.getApplicationById(issue.applicationId, organizationId)
+        : null,
+    ]);
 
     return {
       issue,
       comments,
       customer: customerData,
+      application: applicationData,
       users,
     };
   } catch (error) {
@@ -95,10 +99,20 @@ export default async function IssueDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const { issue, comments, customer, users } = data;
+  const { issue, comments, customer, application, users } = data;
   const assignedUser = issue.assignedToId
     ? users.find((u) => u.id === issue.assignedToId)
     : null;
+
+  // Check if Jira integration is available
+  const hasJiraConfig = !!(
+    process.env.JIRA_BASE_URL &&
+    process.env.JIRA_EMAIL &&
+    process.env.JIRA_API_TOKEN
+  );
+  const canEscalateToJira = !!(application?.jiraProjectKey && hasJiraConfig);
+  const canEscalate =
+    session.userRole === "admin" || session.userRole === "support_agent";
 
   async function addCommentAction(formData: FormData) {
     "use server";
@@ -116,7 +130,15 @@ export default async function IssueDetailPage({ params }: PageProps) {
             currentStatus={issue.status}
           />
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
+          <EscalateToJiraButton
+            issueId={issue.id}
+            isEscalated={!!issue.jiraIssueKey}
+            jiraUrl={issue.jiraUrl}
+            jiraKey={issue.jiraIssueKey}
+            hasJiraConfig={canEscalateToJira}
+            canEscalate={canEscalate}
+          />
           <span
             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
           >

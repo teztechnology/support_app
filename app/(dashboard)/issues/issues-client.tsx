@@ -151,6 +151,9 @@ export function IssuesClient({
                   Application
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  Jira Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Created
                 </th>
               </tr>
@@ -188,6 +191,23 @@ export function IssuesClient({
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
                       {getApplicationName(issue.applicationId)}
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                      {issue.jiraIssueKey ? (
+                        <a
+                          href={issue.jiraUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800 hover:bg-blue-200"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {issue.jiraIssueKey}
+                        </a>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-500">
+                          Not escalated
+                        </span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                       {new Date(issue.createdAt).toLocaleDateString()}

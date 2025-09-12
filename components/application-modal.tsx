@@ -12,6 +12,7 @@ interface ApplicationModalProps {
     name: string;
     description: string;
     isActive: boolean;
+    jiraProjectKey?: string;
   }) => Promise<void>;
 }
 
@@ -25,6 +26,7 @@ export function ApplicationModal({
     name: "",
     description: "",
     isActive: true,
+    jiraProjectKey: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,12 +37,14 @@ export function ApplicationModal({
           name: application.name,
           description: application.description,
           isActive: application.isActive,
+          jiraProjectKey: application.jiraProjectKey || "",
         });
       } else {
         setFormData({
           name: "",
           description: "",
           isActive: true,
+          jiraProjectKey: "",
         });
       }
     }
@@ -56,6 +60,7 @@ export function ApplicationModal({
         name: formData.name.trim(),
         description: formData.description.trim(),
         isActive: formData.isActive,
+        jiraProjectKey: formData.jiraProjectKey.trim() || undefined,
       });
       onClose();
     } catch (error) {
@@ -118,6 +123,31 @@ export function ApplicationModal({
             className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
             placeholder="Describe what this application does..."
           />
+        </div>
+
+        <div>
+          <label
+            htmlFor="jiraProjectKey"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
+            Jira Project Key
+          </label>
+          <input
+            type="text"
+            id="jiraProjectKey"
+            value={formData.jiraProjectKey}
+            onChange={(e) =>
+              setFormData({ ...formData, jiraProjectKey: e.target.value })
+            }
+            disabled={isSubmitting}
+            maxLength={50}
+            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            placeholder="e.g., PROJ, WEBAPP, MOBILE"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Enter the Jira project key where issues should be escalated
+            (optional)
+          </p>
         </div>
 
         <div>

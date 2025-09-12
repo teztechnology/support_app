@@ -137,6 +137,7 @@ export async function createApplication(
     const validatedFields = CreateApplicationSchema.safeParse({
       name: formData.get("name"),
       description: formData.get("description") || "",
+      jiraProjectKey: formData.get("jiraProjectKey") || undefined,
       isActive: formData.get("isActive") === "true",
     });
 
@@ -178,6 +179,7 @@ export async function updateApplication(
     const validatedFields = UpdateApplicationSchema.safeParse({
       name: formData.get("name") || undefined,
       description: formData.get("description") || undefined,
+      jiraProjectKey: formData.get("jiraProjectKey") || undefined,
       isActive: formData.get("isActive") === "true",
     });
 

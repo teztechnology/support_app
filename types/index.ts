@@ -23,6 +23,10 @@ export interface Issue {
   resolvedAt?: string;
   resolutionNotes?: string;
   attachments: string[];
+  jiraIssueKey?: string; // e.g., "PROJ-123"
+  jiraUrl?: string; // Direct link to Jira issue
+  escalatedAt?: string; // When escalated to Jira
+  escalatedBy?: string; // User who escalated
   _ts?: number;
   _etag?: string;
 }
@@ -107,6 +111,7 @@ export interface Application {
   description: string;
   organizationId: string;
   isActive: boolean;
+  jiraProjectKey?: string; // Jira project key for this application
   createdAt: string;
   updatedAt: string;
   _ts?: number;

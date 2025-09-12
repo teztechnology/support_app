@@ -381,6 +381,13 @@ export class CosmosDBQueries {
     return this.queryItems<Application>("applications", querySpec);
   }
 
+  async getApplicationById(
+    id: string,
+    organizationId: string
+  ): Promise<Application | null> {
+    return this.getItem<Application>("applications", id, organizationId);
+  }
+
   async createApplication(
     application: Omit<Application, "id" | "createdAt" | "updatedAt">
   ): Promise<Application> {

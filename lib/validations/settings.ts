@@ -42,6 +42,14 @@ export const CreateApplicationSchema = z.object({
   description: z
     .string()
     .max(500, "Description must be less than 500 characters"),
+  jiraProjectKey: z
+    .string()
+    .max(50, "Jira project key must be less than 50 characters")
+    .regex(
+      /^[A-Z][A-Z0-9]*$/,
+      "Jira project key must contain only uppercase letters and numbers"
+    )
+    .optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -54,6 +62,14 @@ export const UpdateApplicationSchema = z.object({
   description: z
     .string()
     .max(500, "Description must be less than 500 characters")
+    .optional(),
+  jiraProjectKey: z
+    .string()
+    .max(50, "Jira project key must be less than 50 characters")
+    .regex(
+      /^[A-Z][A-Z0-9]*$/,
+      "Jira project key must contain only uppercase letters and numbers"
+    )
     .optional(),
   isActive: z.boolean().optional(),
 });
