@@ -68,6 +68,7 @@ export function IssuesClient({
     priority: IssuePriority;
     customerId: string;
     category?: string;
+    applicationId?: string;
     assignedToId?: string;
   }) => {
     try {
@@ -80,12 +81,24 @@ export function IssuesClient({
       if (data.category) {
         formData.append("category", data.category);
       }
+      if (data.applicationId) {
+        formData.append("applicationId", data.applicationId);
+      }
       if (data.assignedToId) {
         formData.append("assignedToId", data.assignedToId);
       }
 
-      // Call the server action - it will redirect to the new issue page
-      await createIssue(null, formData);
+      // Call the server action and get the result
+      const result = await createIssue(null, formData);
+
+      if (result.success && result.data) {
+        // Add the new issue to the local state
+        setIssues((prev) => [result.data!, ...prev]);
+        // Close the modal
+        setIsModalOpen(false);
+      } else {
+        throw new Error(result.error || "Failed to create issue");
+      }
     } catch (error) {
       console.error("Failed to create issue:", error);
       throw error;
@@ -163,13 +176,8 @@ export function IssuesClient({
                 <tr key={issue.id} className="cursor-pointer hover:bg-gray-50">
                   <Link href={`/issues/${issue.id}`} className="contents">
                     <td className="whitespace-nowrap px-6 py-4">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {issue.title}
-                        </div>
-                        <div className="max-w-md truncate text-sm text-gray-500">
-                          {issue.description}
-                        </div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {issue.title}
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4">
