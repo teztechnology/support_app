@@ -498,7 +498,8 @@ export class CosmosDBQueries {
     ).length;
     const resolvedIssues = issues.filter((i) => i.status === "resolved").length;
     const criticalIssues = issues.filter(
-      (i) => i.priority === "critical"
+      (i) =>
+        i.priority === "critical" && !["resolved", "closed"].includes(i.status)
     ).length;
 
     const issuesByStatus: Record<IssueStatus, number> = {

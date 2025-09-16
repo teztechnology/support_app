@@ -52,6 +52,8 @@ function getPriorityBadgeColor(priority: IssuePriority): string {
   }
 }
 
+type StatusFilter = "all" | "active" | "resolved" | IssueStatus;
+
 export function IssuesClient({
   initialIssues,
   customers,
@@ -61,6 +63,7 @@ export function IssuesClient({
 }: IssuesClientProps) {
   const [issues, setIssues] = useState(initialIssues);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
 
   const handleCreateIssue = async (data: {
     title: string;
@@ -116,6 +119,20 @@ export function IssuesClient({
     return application?.name || applicationId;
   };
 
+  // Filter issues based on selected status
+  const filteredIssues = issues.filter((issue) => {
+    switch (statusFilter) {
+      case "all":
+        return true;
+      case "active":
+        return !["resolved", "closed"].includes(issue.status);
+      case "resolved":
+        return issue.status === "resolved";
+      default:
+        return issue.status === statusFilter;
+    }
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -128,20 +145,70 @@ export function IssuesClient({
         </button>
       </div>
 
-      {issues.length === 0 ? (
+      {/* Status Filter Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            {
+              key: "active",
+              label: "Active Issues",
+              count: issues.filter(
+                (i) => !["resolved", "closed"].includes(i.status)
+              ).length,
+            },
+            {
+              key: "resolved",
+              label: "Resolved",
+              count: issues.filter((i) => i.status === "resolved").length,
+            },
+            { key: "all", label: "All Issues", count: issues.length },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setStatusFilter(tab.key as StatusFilter)}
+              className={`flex items-center space-x-2 border-b-2 px-1 py-2 text-sm font-medium ${
+                statusFilter === tab.key
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`rounded-full px-2 py-1 text-xs ${
+                  statusFilter === tab.key
+                    ? "bg-blue-100 text-blue-600"
+                    : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {filteredIssues.length === 0 ? (
         <div className="rounded-lg bg-white p-8 text-center shadow">
           <h3 className="mb-2 text-lg font-medium text-gray-900">
-            No issues found
+            {issues.length === 0
+              ? "No issues found"
+              : `No ${statusFilter === "active" ? "active" : statusFilter === "resolved" ? "resolved" : statusFilter} issues found`}
           </h3>
           <p className="mb-4 text-gray-600">
-            Get started by creating your first support issue.
+            {issues.length === 0
+              ? "Get started by creating your first support issue."
+              : statusFilter === "resolved"
+                ? "No issues have been resolved yet."
+                : `No ${statusFilter} issues at the moment.`}
           </p>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
-          >
-            Create First Issue
-          </button>
+          {issues.length === 0 && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+            >
+              Create First Issue
+            </button>
+          )}
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg bg-white shadow">
@@ -172,7 +239,7 @@ export function IssuesClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
-              {issues.map((issue) => (
+              {filteredIssues.map((issue) => (
                 <tr key={issue.id} className="cursor-pointer hover:bg-gray-50">
                   <Link href={`/issues/${issue.id}`} className="contents">
                     <td className="whitespace-nowrap px-6 py-4">

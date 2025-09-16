@@ -9,9 +9,7 @@ async function getPageData(organizationId: string) {
   try {
     const [issues, customers, categories, applications, users] =
       await Promise.all([
-        dbQueries.getIssues(organizationId, {
-          status: ["new", "in_progress", "awaiting_customer"],
-        }),
+        dbQueries.getIssues(organizationId),
         dbQueries.getCustomers(organizationId),
         dbQueries.getCategories(organizationId),
         dbQueries.getApplications(organizationId),
