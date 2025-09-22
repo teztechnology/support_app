@@ -238,15 +238,42 @@ export class SessionManager {
         return [];
       }
 
-      // For now, we'll use a placeholder implementation
-      // In a real implementation, you might need to paginate through members
-      console.warn(
-        "getOrganizationMembers: Using limited implementation. Consider implementing pagination."
-      );
-      return [];
+      const client = getStytchB2BServerClient();
+
+      // Get organization from Stytch which includes members
+      const response = await client.organizations.get({
+        organization_id: organizationId,
+      });
+
+      return response.organization?.members || [];
     } catch (error) {
       console.error("Failed to fetch organization members:", error);
       return [];
+    }
+  }
+
+  static async getOrganizationMemberById(
+    organizationId: string,
+    memberId: string
+  ): Promise<any | null> {
+    try {
+      if (!organizationId || !memberId) {
+        console.error("Organization ID or Member ID is null or undefined");
+        return null;
+      }
+
+      const client = getStytchB2BServerClient();
+
+      // Get member directly by ID
+      const response = await client.organizations.members.get({
+        organization_id: organizationId,
+        member_id: memberId,
+      });
+
+      return response.member || null;
+    } catch (error) {
+      console.error("Failed to fetch organization member by ID:", error);
+      return null;
     }
   }
 

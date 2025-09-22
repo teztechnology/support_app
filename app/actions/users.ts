@@ -98,12 +98,10 @@ export async function addUserToDatabase(
   try {
     const session = await SessionManager.requirePermission("settings:write");
 
-    // Get the Stytch member details
-    const stytchMembers = await SessionManager.getOrganizationMembers(
-      session.stytchOrganizationId!
-    );
-    const stytchMember = stytchMembers.find(
-      (m) => m.member_id === stytchMemberId
+    // Get the Stytch member details directly by member ID
+    const stytchMember = await SessionManager.getOrganizationMemberById(
+      session.stytchOrganizationId!,
+      stytchMemberId
     );
 
     if (!stytchMember) {
@@ -139,7 +137,7 @@ export async function addUserToDatabase(
       "users",
       {
         ...newUser,
-        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
