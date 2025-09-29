@@ -12,7 +12,8 @@ import {
   IssuePriority,
 } from "@/types";
 import { IssueModal } from "@/components/issue-modal";
-import { createIssue } from "@/app/actions/issues";
+import { IssueEditModal } from "@/components/issue-edit-modal";
+import { createIssue, updateIssue } from "@/app/actions/issues";
 
 interface IssuesClientProps {
   initialIssues: Issue[];
@@ -63,6 +64,8 @@ export function IssuesClient({
 }: IssuesClientProps) {
   const [issues, setIssues] = useState(initialIssues);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
 
   const handleCreateIssue = async (data: {
@@ -106,6 +109,69 @@ export function IssuesClient({
       console.error("Failed to create issue:", error);
       throw error;
     }
+  };
+
+  const handleEditIssue = async (data: {
+    title: string;
+    description: string;
+    status: IssueStatus;
+    priority: IssuePriority;
+    customerId: string;
+    category?: string;
+    applicationId?: string;
+    assignedToId?: string;
+    resolutionNotes?: string;
+  }) => {
+    if (!editingIssue) return;
+
+    try {
+      // Create a FormData object to match the existing server action signature
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("status", data.status);
+      formData.append("priority", data.priority);
+      formData.append("customerId", data.customerId);
+      if (data.category) {
+        formData.append("category", data.category);
+      }
+      if (data.applicationId) {
+        formData.append("applicationId", data.applicationId);
+      }
+      if (data.assignedToId) {
+        formData.append("assignedToId", data.assignedToId);
+      }
+      if (data.resolutionNotes) {
+        formData.append("resolutionNotes", data.resolutionNotes);
+      }
+
+      // Call the server action and get the result
+      const result = await updateIssue(editingIssue.id, null, formData);
+
+      if (result.success && result.data) {
+        // Update the issue in the local state
+        setIssues((prev) =>
+          prev.map((issue) =>
+            issue.id === editingIssue.id ? result.data! : issue
+          )
+        );
+        // Close the modal
+        setIsEditModalOpen(false);
+        setEditingIssue(null);
+      } else {
+        throw new Error(result.error || "Failed to update issue");
+      }
+    } catch (error) {
+      console.error("Failed to update issue:", error);
+      throw error;
+    }
+  };
+
+  const handleEditClick = (issue: Issue, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingIssue(issue);
+    setIsEditModalOpen(true);
   };
 
   const getCustomerName = (customerId: string) => {
@@ -236,58 +302,70 @@ export function IssuesClient({
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                   Created
                 </th>
+                <th className="relative px-6 py-3">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {filteredIssues.map((issue) => (
-                <tr key={issue.id} className="cursor-pointer hover:bg-gray-50">
-                  <Link href={`/issues/${issue.id}`} className="contents">
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {issue.title}
-                      </div>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(issue.status)}`}
+                <tr key={issue.id} className="hover:bg-gray-50">
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <Link
+                      href={`/issues/${issue.id}`}
+                      className="text-sm font-medium text-gray-900 hover:text-blue-600"
+                    >
+                      {issue.title}
+                    </Link>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusBadgeColor(issue.status)}`}
+                    >
+                      {issue.status.replace("_", " ")}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
+                    >
+                      {issue.priority}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {getCustomerName(issue.customerId)}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                    {getApplicationName(issue.applicationId)}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {issue.jiraIssueKey ? (
+                      <a
+                        href={issue.jiraUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800 hover:bg-blue-200"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {issue.status.replace("_", " ")}
+                        {issue.jiraIssueKey}
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-500">
+                        Not escalated
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getPriorityBadgeColor(issue.priority)}`}
-                      >
-                        {issue.priority}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {getCustomerName(issue.customerId)}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                      {getApplicationName(issue.applicationId)}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {issue.jiraIssueKey ? (
-                        <a
-                          href={issue.jiraUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800 hover:bg-blue-200"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {issue.jiraIssueKey}
-                        </a>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-500">
-                          Not escalated
-                        </span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                      {new Date(issue.createdAt).toLocaleDateString()}
-                    </td>
-                  </Link>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
+                    {new Date(issue.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                    <button
+                      onClick={(e) => handleEditClick(issue, e)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      Edit
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -304,6 +382,22 @@ export function IssuesClient({
         users={users}
         onSubmit={handleCreateIssue}
       />
+
+      {editingIssue && (
+        <IssueEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingIssue(null);
+          }}
+          issue={editingIssue}
+          customers={customers}
+          categories={categories}
+          applications={applications}
+          users={users}
+          onSubmit={handleEditIssue}
+        />
+      )}
     </div>
   );
 }

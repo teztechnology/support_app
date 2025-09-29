@@ -34,6 +34,8 @@ export const UpdateIssueSchema = z.object({
     .optional(),
   priority: z.enum(["critical", "high", "medium", "low"]).optional(),
   category: z.string().optional(),
+  applicationId: z.string().optional(),
+  customerId: z.string().optional(),
   assignedToId: z.string().optional(),
   resolutionNotes: z
     .string()

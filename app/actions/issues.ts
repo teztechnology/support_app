@@ -136,6 +136,8 @@ export async function updateIssue(
       status: formData.get("status") || undefined,
       priority: formData.get("priority") || undefined,
       category: formData.get("category") || undefined,
+      applicationId: formData.get("applicationId") || undefined,
+      customerId: formData.get("customerId") || undefined,
       assignedToId: formData.get("assignedToId") || undefined,
       resolutionNotes: formData.get("resolutionNotes") || undefined,
     });
